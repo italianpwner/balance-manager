@@ -28,7 +28,10 @@ public class Logger {
 		return instance;
 	}
 	
-	public void fatal(String message) { log(Level.FATAL, message); }
+	public void fatal(String message) { 
+		log(Level.FATAL, message);
+		System.exit(-1);
+	}
 	public void error(String message) { log(Level.ERROR, message); }
 	public void warn (String message) { log(Level.WARN , message); }
 	public void info (String message) { log(Level.INFO , message); }

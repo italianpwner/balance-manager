@@ -22,7 +22,7 @@ public class MainWindow {
 		logger.trace("Index >> main");
 		
 		java.util.Properties appProps =
-				Properties.getInstance().loadProperties();
+				Properties.getInstance().getProperties();
 		
 		logger = Logger.getInstance(
 				Level.valueOf(appProps.getProperty("logger.level")),

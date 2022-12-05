@@ -18,22 +18,29 @@ public class Properties {
 		return instance;
 	}
 	
-	public java.util.Properties loadProperties() {
+	public java.util.Properties getProperties() {
+		logger.trace("Properties >> getProperties");
+		if(properties == null)
+			properties = loadProperties();
+		return properties;
+	}
+	
+	private java.util.Properties loadProperties() {
 		logger.trace("Properties >> loadProperties");
 		
 		String rootPath = Thread.currentThread()
 				.getContextClassLoader()
 				.getResource("").getPath();
-		String filePath = rootPath + "../app.properties";		// TODO REMOVE THIS BEFORE PUBLISHING
+		String filePath = rootPath + "../files/app.properties";		// TODO REMOVE THIS BEFORE PUBLISHING
 		
-		logger.info("Loading properties from '"+filePath+"'...");
+		logger.info("Loading properties from '"+filePath+"'");
 		
 		properties = new java.util.Properties();
 		try {
 			properties.load(new FileInputStream(filePath));
 			logger.info("Properties loaded.");
 		} catch(Exception e) {
-			logger.error(e.getMessage());
+			logger.fatal(e.getMessage());
 		}
 		
 		return properties;
