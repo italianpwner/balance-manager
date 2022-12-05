@@ -3,8 +3,14 @@ package view;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import util.Level;
+import util.Logger;
+import util.Properties;
+
 public class MainWindow {
 
+	static Logger logger = Logger.getInstance(Level.ALL, true, true);
+	
 	protected Shell shell;
 
 	/**
@@ -12,6 +18,18 @@ public class MainWindow {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		logger.info("=== APPLICATION STARTED ===");
+		logger.trace("Index >> main");
+		
+		java.util.Properties appProps =
+				Properties.getInstance().loadProperties();
+		
+		logger = Logger.getInstance(
+				Level.valueOf(appProps.getProperty("logger.level")),
+				Boolean.parseBoolean(appProps.getProperty("logger.trace")),
+				Boolean.parseBoolean(appProps.getProperty("logger.data"))
+		);
+		
 		try {
 			MainWindow window = new MainWindow();
 			window.open();
