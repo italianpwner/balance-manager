@@ -46,4 +46,6 @@ public class Transaction {
 				id, amount, DateUtils.convert(date), "'"+category+"'", description
 		);
 	}
+	
+	public Double getAmount() { return amount; }
 }

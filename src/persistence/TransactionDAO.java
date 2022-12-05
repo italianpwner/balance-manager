@@ -31,6 +31,11 @@ public class TransactionDAO {
 		}
 		return instance;
 	}
+	
+	public List<String> getAll() {
+		logger.trace("TransactionDAO >> getAll");
+		return FileUtils.read(fileName_transactions);
+	}
 
 	public List<String> writeToCSV() {
 		List<String> data =
