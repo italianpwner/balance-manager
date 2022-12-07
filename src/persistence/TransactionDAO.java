@@ -9,7 +9,8 @@ import util.Logger;
 
 public class TransactionDAO {
 	
-	static Logger logger = Logger.getInstance();
+	private static Logger logger =
+			Logger.getInstance();
 	
 	private static TransactionDAO instance;
 	private static String fileName_newTransactions;

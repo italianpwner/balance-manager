@@ -10,7 +10,8 @@ import java.util.List;
 
 public class FileUtils {
 	
-	static Logger logger = Logger.getInstance();
+	private static Logger logger =
+			Logger.getInstance();
 	
 	public static List<String> read(String fileName) {
 		logger.trace("FileUtils >> read");

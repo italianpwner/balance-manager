@@ -3,11 +3,8 @@ package model;
 import java.time.LocalDate;
 
 import util.DateUtils;
-import util.Logger;
 
 public class Transaction {
-	
-	static Logger logger = Logger.getInstance();
 	
 	private Integer id;
 	private Double amount;

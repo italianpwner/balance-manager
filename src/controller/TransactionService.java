@@ -28,12 +28,12 @@ public class TransactionService {
 		id = 0;
 
 		dao = TransactionDAO.getInstance();
-		updateCache(dao.getAll());
+		_updateCache(dao.getAll());
 		
 		logger.info("TransactionService: cache created.");
 	}
 	
-	public static TransactionService getInstance() {
+	static TransactionService getInstance() {
 		logger.trace("TransactionService >> getInstance");
 		
 		if(instance == null)
@@ -41,7 +41,7 @@ public class TransactionService {
 		return instance;
 	}
 	
-	public Double getTotalBalance() {
+	Double getTotalBalance() {
 		logger.trace("TransactionService >> getTotalBalance");
 		
 		// TODO fix floating point errors
@@ -51,7 +51,7 @@ public class TransactionService {
 		return balance;
 	}
 	
-	public boolean loadNewTransactions() {
+	boolean loadNewTransactions() {
 		logger.trace("TransactionService >> loadNewTransactions");
 		logger.info("TransactionService: loading new transactions...");
 		
@@ -59,13 +59,13 @@ public class TransactionService {
 		if(data.isEmpty())
 			return false;
 		else {
-			updateCache(data);
+			_updateCache(data);
 			logger.info("TransactionService: new transactions loaded.");
 		}
 		return true;
 	}
 	
-	private void updateCache(List<String> data) {
+	private void _updateCache(List<String> data) {
 		logger.trace("TransactionService >> updateCache");
 		
 		for(String s: data) {
@@ -77,7 +77,7 @@ public class TransactionService {
 		}
 	}
 
-	public List<Transaction> getCache(
+	List<Transaction> getCache(
 			Set<String> selectedCategories,
 			LocalDate from, LocalDate to)
 	{
@@ -93,13 +93,13 @@ public class TransactionService {
 		return list;
 	}
 	
-	public Set<String> getCategories() { return categories; }
+	Set<String> getCategories() { return categories; }
 	
-	public LocalDate getFirstDate() {
+	LocalDate getFirstDate() {
 		return cache.get(0).getDate();
 	}
 	
-	public LocalDate getLastDate () {
+	LocalDate getLastDate () {
 		return cache.get(cache.size()-1).getDate();
 	}
 }

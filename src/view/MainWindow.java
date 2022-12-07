@@ -13,7 +13,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
-import controller.TransactionService;
 import controller.ViewService;
 import util.AppProperties;
 import util.Level;
@@ -21,14 +20,8 @@ import util.Logger;
 
 public class MainWindow {
 
-	static Logger logger =
+	private static Logger logger =
 			Logger.getInstance(Level.ALL, true, true);
-	
-	static Properties appProps = AppProperties
-			.getInstance().getProperties();
-	
-	private TransactionService service =
-			TransactionService.getInstance();	
 	
 //*/*************   Widgets   **************/**/
 /**/ protected static Shell shell;			/**/
@@ -46,6 +39,9 @@ public class MainWindow {
 	public static void main(String[] args) {
 		logger.info("=== APPLICATION STARTED ===");
 		logger.trace("MainWindow >> main");
+		
+		Properties appProps = AppProperties
+				.getInstance().getProperties();
 		
 		logger = Logger.getInstance(
 				Level.valueOf(appProps.getProperty("logger.level")),
@@ -150,8 +146,6 @@ public class MainWindow {
 /**/			SWT.BORDER | SWT.READ_ONLY | SWT.RIGHT);	/**/
 /**/	textTotBalance.setEditable(false);					/**/
 /**/	textTotBalance.setBounds(707, 13, 78, 26);			/**/
-/**/	textTotBalance.setText(								/**/
-/**/			service.getTotalBalance().toString());		/**/
 //*/********************************************************/**/
 
 
@@ -179,6 +173,7 @@ public class MainWindow {
 /**/	dateTimeTo.setBounds(806, 145, 102, 28);					/**/
 //*/****************************************************************/**/
 
+		ViewService.initBalance();
 		ViewService.initDateTimes();
 		ViewService.addEventListeners();
 		ViewService.updateInterface();

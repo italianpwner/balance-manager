@@ -29,27 +29,27 @@ public class Logger {
 	}
 	
 	public void fatal(Exception e) { 
-		log(Level.FATAL, "");
+		_log(Level.FATAL, "");
 		e.printStackTrace(System.out);
 		System.exit(-1);
 	}
-	public void error(String message) { log(Level.ERROR, message); }
-	public void warn (String message) { log(Level.WARN , message); }
-	public void info (String message) { log(Level.INFO , message); }
-	public void debug(String message) { log(Level.DEBUG, message); }
-	public void data (String message) { log(_data , "DATA" , "\""+message); }
-	public void trace(String message) { log(_trace, "TRACE", "\t"+message); }
+	public void error(String message) { _log(Level.ERROR, message); }
+	public void warn (String message) { _log(Level.WARN , message); }
+	public void info (String message) { _log(Level.INFO , message); }
+	public void debug(String message) { _log(Level.DEBUG, message); }
+	public void data (String message) { _log(_data , "DATA" , "\""+message); }
+	public void trace(String message) { _log(_trace, "TRACE", "\t"+message); }
 	
-	private void log(Level level, String message) {
+	private void _log(Level level, String message) {
 		boolean enabled = _level.get() >= level.get();
-		if(enabled) print(level.toString(), message);
+		if(enabled) _print(level.toString(), message);
 	}
 	
-	private void log(boolean enabled, String level, String message) {
-		if(enabled) print(level, message);
+	private void _log(boolean enabled, String level, String message) {
+		if(enabled) _print(level, message);
 	}
 	
-	private void print(String level, String message) {
+	private void _print(String level, String message) {
 		SimpleDateFormat sdf =
 				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 		Timestamp t = new Timestamp(System.currentTimeMillis());

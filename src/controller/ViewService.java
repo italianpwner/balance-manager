@@ -67,6 +67,13 @@ public class ViewService extends view.MainWindow {
 		}
 	}
 	
+	
+	public static void initBalance() {
+		textTotBalance.setText(
+				service.getTotalBalance().toString());
+	}
+	
+	
 	public static void addEventListeners() {
 		logger.trace("ViewService >> addEventListeners");
 		

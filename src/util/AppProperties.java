@@ -5,7 +5,8 @@ import java.util.Properties;
 
 public class AppProperties {
 	
-	static Logger logger = Logger.getInstance();
+	private static Logger logger =
+			Logger.getInstance();
 	
 	private static AppProperties instance;
 	private static Properties properties;
@@ -22,11 +23,11 @@ public class AppProperties {
 	public Properties getProperties() {
 		logger.trace("AppProperties >> getProperties");
 		if(properties == null)
-			properties = loadProperties();
+			properties = _loadProperties();
 		return properties;
 	}
 	
-	private Properties loadProperties() {
+	private Properties _loadProperties() {
 		logger.trace("AppProperties >> loadProperties");
 		
 		String rootPath = Thread.currentThread()
