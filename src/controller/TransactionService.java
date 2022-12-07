@@ -1,8 +1,10 @@
 package controller;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import model.Transaction;
 import persistence.TransactionDAO;
@@ -13,6 +15,7 @@ public class TransactionService {
 	static Logger logger = Logger.getInstance();
 	
 	private List<Transaction> cache;
+	private Set<String> categories;
 	private TransactionDAO dao;
 	private int id;
 	
@@ -21,6 +24,7 @@ public class TransactionService {
 		logger.info("TransactionService: creating cache...");
 		
 		cache = new LinkedList<Transaction>();
+		categories = new HashSet<String>();
 		id = 0;
 
 		dao = TransactionDAO.getInstance();
@@ -67,23 +71,29 @@ public class TransactionService {
 		for(String s: data) {
 			Transaction t = Transaction.make(s, id++);
 			logger.data(t.toString());
+			
+			categories.add(t.getCategory());
 			cache.add(t);
 		}
 	}
 
 	public List<Transaction> getCache(
+			Set<String> selectedCategories,
 			LocalDate from, LocalDate to)
 	{
 		List<Transaction> list =
 				new LinkedList<Transaction>();
 		for(Transaction t: cache)
-			if(t.getDate().isAfter(from.minusDays(1))
+			if(selectedCategories.contains(t.getCategory())
+				&& t.getDate().isAfter(from.minusDays(1))
 				&& t.getDate().isBefore(to.minusDays(1))
 			) {
 				list.add(t);
 			}
 		return list;
 	}
+	
+	public Set<String> getCategories() { return categories; }
 	
 	public LocalDate getFirstDate() {
 		return cache.get(0).getDate();
