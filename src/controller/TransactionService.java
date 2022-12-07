@@ -37,7 +37,7 @@ public class TransactionService {
 	}
 	
 	public Double getTotalBalance() {
-		logger.trace("TransactionService >> getBalance");
+		logger.trace("TransactionService >> getTotalBalance");
 		
 		Double balance = 0.0;
 		for(Transaction t: cache)
@@ -45,16 +45,16 @@ public class TransactionService {
 		return balance;
 	}
 	
-	public boolean addNewTransactions() {
-		logger.trace("TransactionService >> addNewTransactions");
-		logger.info("TransactionService: adding new transactions...");
+	public boolean loadNewTransactions() {
+		logger.trace("TransactionService >> loadNewTransactions");
+		logger.info("TransactionService: loading new transactions...");
 		
 		List<String> data = dao.writeToCSV();
 		if(data.isEmpty())
 			return false;
 		else {
 			updateCache(data);
-			logger.info("TransactionService: new transactions added.");
+			logger.info("TransactionService: new transactions loaded.");
 		}
 		return true;
 	}
@@ -69,4 +69,5 @@ public class TransactionService {
 		}
 	}
 
+	public List<Transaction> getCache() { return cache; }
 }

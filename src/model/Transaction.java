@@ -43,9 +43,13 @@ public class Transaction {
 	public String toString() {
 		return String.format(
 				"{id: %03d, amount: %8.2f, date %s, category: %-12s, description: '%s'}",
-				id, amount, DateUtils.convert(date), "'"+category+"'", description
+				id, amount, DateUtils.toString(date), "'"+category+"'", description
 		);
 	}
 	
-	public Double getAmount() { return amount; }
+	public Integer	 getId		   () { return id;			}
+	public Double	 getAmount	   () { return amount;		}
+	public LocalDate getDate	   () { return date;		}
+	public String	 getCategory   () { return category;	}
+	public String	 getDescription() { return description; }
 }

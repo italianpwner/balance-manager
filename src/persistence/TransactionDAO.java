@@ -1,10 +1,11 @@
 package persistence;
 
 import java.util.List;
+import java.util.Properties;
 
+import util.AppProperties;
 import util.FileUtils;
 import util.Logger;
-import util.Properties;
 
 public class TransactionDAO {
 	
@@ -20,8 +21,8 @@ public class TransactionDAO {
 		if(instance == null) {
 			instance = new TransactionDAO();
 			
-			java.util.Properties appProps =
-					Properties.getInstance().getProperties();
+			Properties appProps = AppProperties
+					.getInstance().getProperties();
 			
 			String filePath = appProps.getProperty("files.path");
 			fileName_newTransactions =

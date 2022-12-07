@@ -1,44 +1,43 @@
 package util;
 
 import java.io.FileInputStream;
+import java.util.Properties;
 
-public class Properties {
+public class AppProperties {
 	
 	static Logger logger = Logger.getInstance();
 	
-	private static Properties instance;
-	private static java.util.Properties properties;
+	private static AppProperties instance;
+	private static Properties properties;
 	
-	private Properties() {}
-	public static Properties getInstance() {
-		logger.trace("Properties >> getInstance");
+	private AppProperties() {}
+	public static AppProperties getInstance() {
+		logger.trace("AppProperties >> getInstance");
 		
 		if(instance == null)
-			instance = new Properties();
+			instance = new AppProperties();
 		return instance;
 	}
 	
-	public java.util.Properties getProperties() {
-		logger.trace("Properties >> getProperties");
+	public Properties getProperties() {
+		logger.trace("AppProperties >> getProperties");
 		if(properties == null)
 			properties = loadProperties();
 		return properties;
 	}
 	
-	private java.util.Properties loadProperties() {
-		logger.trace("Properties >> loadProperties");
+	private Properties loadProperties() {
+		logger.trace("AppProperties >> loadProperties");
 		
 		String rootPath = Thread.currentThread()
 				.getContextClassLoader()
 				.getResource("").getPath();
 		String filePath = rootPath + "../files/app.properties";		// TODO REMOVE THIS BEFORE PUBLISHING
 		
-		logger.info("Loading properties from '"+filePath+"'");
-		
-		properties = new java.util.Properties();
+		properties = new Properties();
 		try {
 			properties.load(new FileInputStream(filePath));
-			logger.info("Properties loaded.");
+			logger.info("Properties loaded from '"+filePath+"'.");
 		} catch(Exception e) {
 			logger.fatal(e.getMessage());
 		}

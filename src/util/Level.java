@@ -2,14 +2,15 @@ package util;
 
 public enum Level {
 	
-	OFF  ((byte) 0),
-	FATAL((byte) 1),
-	ERROR((byte) 2),
-	WARN ((byte) 3),
-	INFO ((byte) 4),
-	ALL  ((byte) 5);
+	OFF  (0),
+	FATAL(1),
+	ERROR(2),
+	WARN (3),
+	INFO (4),
+	DEBUG(5),
+	ALL  (6);
 
-	private final byte val;
-	private Level(byte val) { this.val = val; }
+	private final int val;
+	private Level(int val) { this.val = val; }
 	public int get() { return val; }
 }

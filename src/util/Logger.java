@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 public class Logger {
 
 	private static Logger instance;
-	private static Level _level;
+	private static Level   _level;
 	private static boolean _trace;
 	private static boolean _data;
 	
@@ -35,6 +35,7 @@ public class Logger {
 	public void error(String message) { log(Level.ERROR, message); }
 	public void warn (String message) { log(Level.WARN , message); }
 	public void info (String message) { log(Level.INFO , message); }
+	public void debug(String message) { log(Level.DEBUG, message); }
 	public void data (String message) { log(_data , "DATA" , "\""+message); }
 	public void trace(String message) { log(_trace, "TRACE", "\t"+message); }
 	
