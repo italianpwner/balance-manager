@@ -1,5 +1,6 @@
 package controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -19,7 +20,16 @@ public class ViewService extends view.MainWindow {
 	public static void updateInterface() {
 		logger.trace("ViewService >> updateInterface");
 
-		List<Transaction> list = service.getCache();
+		LocalDate from = DateUtils.convert(dateTimeFrom);
+		LocalDate  to  = DateUtils.convert(dateTimeTo);
+
+		logger.debug("Selected date range: "+
+				DateUtils.toString(from)+" - "+
+				DateUtils.toString(to));
+		
+		
+		List<Transaction> list = service
+				.getCache(from,to);
 		
 		table.setItemCount(0);
 		for(int i=0; i<list.size(); i++) {
@@ -54,5 +64,43 @@ public class ViewService extends view.MainWindow {
 			}
 		});
 		logger.info("Added listener to Button 'btnLoadNew'");
+
+		
+		dateTimeFrom.addSelectionListener(new SelectionAdapter() {	
+			@Override												
+			public void widgetSelected(SelectionEvent e) {			
+				logger.trace("dateTimeFrom: updated");				
+				logger.info("User updated 'dateTimeFrom'");			
+				updateInterface();								
+			}
+		});	
+		logger.info("Added listener to DateTime 'dateTimeFrom'");		
+		
+	
+		dateTimeTo.addSelectionListener(new SelectionAdapter() {	
+			@Override												
+			public void widgetSelected(SelectionEvent e) {			
+				logger.trace("dateTimeTo: updated");				
+				logger.info("User updated 'dateTimeTo'");			
+				updateInterface();								
+			}
+		});	
+		logger.info("Added listener to DateTime 'dateTimeTo'");		
+	}
+	
+	public static void initDateTimes() {
+		logger.trace("ViewService >> initDateTimes");
+		
+		LocalDate firstDate = service.getFirstDate();				
+		dateTimeFrom.setDate(										
+				firstDate.getYear(),								
+				firstDate.getMonthValue()-1,						
+				firstDate.getDayOfMonth());
+
+		LocalDate lastDate = service.getLastDate();				
+		dateTimeTo.setDate(										
+				lastDate.getYear(),								
+				lastDate.getMonthValue()-1,						
+				lastDate.getDayOfMonth());					
 	}
 }

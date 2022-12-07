@@ -1,5 +1,6 @@
 package controller;
 
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class TransactionService {
 	public Double getTotalBalance() {
 		logger.trace("TransactionService >> getTotalBalance");
 		
+		// TODO fix floating point errors
 		Double balance = 0.0;
 		for(Transaction t: cache)
 			balance += t.getAmount();
@@ -69,5 +71,25 @@ public class TransactionService {
 		}
 	}
 
-	public List<Transaction> getCache() { return cache; }
+	public List<Transaction> getCache(
+			LocalDate from, LocalDate to)
+	{
+		List<Transaction> list =
+				new LinkedList<Transaction>();
+		for(Transaction t: cache)
+			if(t.getDate().isAfter(from.minusDays(1))
+				&& t.getDate().isBefore(to.minusDays(1))
+			) {
+				list.add(t);
+			}
+		return list;
+	}
+	
+	public LocalDate getFirstDate() {
+		return cache.get(0).getDate();
+	}
+	
+	public LocalDate getLastDate () {
+		return cache.get(cache.size()-1).getDate();
+	}
 }
