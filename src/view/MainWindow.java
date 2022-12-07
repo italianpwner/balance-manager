@@ -4,6 +4,7 @@ import java.awt.Toolkit;
 import java.util.Properties;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -32,6 +33,7 @@ public class MainWindow {
 /**/ protected static Shell shell;			/**/
 /**/ protected static Table table;			/**/
 /**/ protected static Text textTotBalance;	/**/
+/**/ protected static Button btnLoadNew;	/**/
 //*/****************************************/**/
 
 	/**
@@ -149,6 +151,14 @@ public class MainWindow {
 /**/			service.getTotalBalance().toString());		/**/
 //*/********************************************************/**/
 
+
+//*/******************   LoadButton   ******************/**/
+/**/	btnLoadNew = new Button(shell, SWT.NONE);		/**/
+/**/	btnLoadNew.setBounds(823, 10, 160, 30);			/**/
+/**/	btnLoadNew.setText("Load new transactions");	/**/
+//*/****************************************************/**/
+
+		ViewService.addEventListeners();
 		ViewService.updateInterface();
 		
 		logger.info("MainWindow: window contents created.");

@@ -3,6 +3,8 @@ package controller;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.TableItem;
 
 import model.Transaction;
@@ -30,5 +32,27 @@ public class ViewService extends view.MainWindow {
 			item.setText(4, t.getCategory());
 			item.setText(5, t.getDescription());
 		}
+	}
+	
+	public static void addEventListeners() {
+		logger.trace("ViewService >> addEventListeners");
+		
+		btnLoadNew.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				logger.trace("btnLoadNew: clicked");
+				logger.info("User clicked on button 'btnLoadNew'");
+				
+				boolean theresNewData =
+						service.loadNewTransactions();
+				if(theresNewData) {
+					textTotBalance.setText(
+							service.getTotalBalance().toString());
+					updateInterface();
+					logger.info("Window contents updated");
+				}
+			}
+		});
+		logger.info("Added listener to Button 'btnLoadNew'");
 	}
 }
