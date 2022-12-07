@@ -14,6 +14,7 @@ public class FileUtils {
 	
 	public static List<String> read(String fileName) {
 		logger.trace("FileUtils >> read");
+		logger.info("Reading from file '"+fileName+"'...");
 		
 		BufferedReader reader = null;
 		List<String> list = new LinkedList<String>();
@@ -44,6 +45,7 @@ public class FileUtils {
 	
 	public static void write(String fileName, List<String> data) {
 		logger.trace("FileUtils >> write");
+		logger.info("Writing to file '"+fileName+"'...");
 		
 		FileWriter fw = null;
 		BufferedWriter bw = null;
@@ -72,6 +74,7 @@ public class FileUtils {
 	
 	public static void deleteContents(String fileName) {
 		logger.trace("FileUtils >> deleteContents");
+		logger.info("Deleting contents of file '"+fileName+"'...");
 		
 		FileWriter fw = null;
 		BufferedWriter bw = null;
