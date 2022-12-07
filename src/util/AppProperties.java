@@ -39,7 +39,7 @@ public class AppProperties {
 			properties.load(new FileInputStream(filePath));
 			logger.info("Properties loaded from '"+filePath+"'.");
 		} catch(Exception e) {
-			logger.fatal(e.getMessage());
+			logger.fatal(e);
 		}
 		
 		return properties;

@@ -57,7 +57,7 @@ public class MainWindow {
 					new MainWindow();
 			window.open();
 		} catch (Exception e) {
-			logger.fatal(e.getMessage());
+			logger.fatal(e);
 		}
 	}
 

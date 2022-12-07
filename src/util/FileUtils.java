@@ -31,12 +31,12 @@ public class FileUtils {
 			}
 			
 		} catch(Exception e) {
-			logger.fatal(e.getMessage());
+			logger.fatal(e);
 		} finally {
 			try {
 				reader.close();
 			} catch(Exception e) {
-				logger.fatal(e.getMessage());
+				logger.fatal(e);
 			}
 		}
 		
@@ -61,13 +61,13 @@ public class FileUtils {
 			}
 			
 		} catch(Exception e) {
-			logger.fatal(e.getMessage());
+			logger.fatal(e);
 		} finally {
 			try {
 				bw.close();
 				fw.close();
 			} catch(Exception e) {
-				logger.fatal(e.getMessage());
+				logger.fatal(e);
 			}
 		}
 	}
@@ -86,13 +86,13 @@ public class FileUtils {
 			bw.write("");
 			
 		} catch(Exception e) {
-			logger.fatal(e.getMessage());
+			logger.fatal(e);
 		} finally {
 			try {
 				bw.close();
 				fw.close();
 			} catch(Exception e) {
-				logger.fatal(e.getMessage());
+				logger.fatal(e);
 			}
 		}
 	}

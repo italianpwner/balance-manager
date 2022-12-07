@@ -28,8 +28,9 @@ public class Logger {
 		return instance;
 	}
 	
-	public void fatal(String message) { 
-		log(Level.FATAL, message);
+	public void fatal(Exception e) { 
+		log(Level.FATAL, "");
+		e.printStackTrace(System.out);
 		System.exit(-1);
 	}
 	public void error(String message) { log(Level.ERROR, message); }
