@@ -7,29 +7,23 @@ public class Logger {
 
 	private static Logger instance;
 	private static Level   _level;
-	private static boolean _trace;
-	private static boolean _data;
 	
 	public static Logger getInstance() {
-		return getInstance(_level,_trace,_data);
+		return getInstance(_level);
 	}
 	
 	private Logger() {}
-	public static Logger getInstance(Level level,
-			boolean trace, boolean data)
+	public static Logger getInstance(Level level)
 	{
 		if(instance == null)
 			instance = new Logger();
 		
 		_level = level;
-		_trace = trace;
-		_data  = data;
-		
 		return instance;
 	}
 	
-	public void fatal(Exception e) { 
-		_log(Level.FATAL, "");
+	public void fatal(String message, Exception e) { 
+		_log(Level.FATAL, message);
 		e.printStackTrace(System.out);
 		System.exit(-1);
 	}
@@ -37,16 +31,12 @@ public class Logger {
 	public void warn (String message) { _log(Level.WARN , message); }
 	public void info (String message) { _log(Level.INFO , message); }
 	public void debug(String message) { _log(Level.DEBUG, message); }
-	public void data (String message) { _log(_data , "DATA" , "\""+message); }
-	public void trace(String message) { _log(_trace, "TRACE", "\t"+message); }
+	public void trace(String message) { _log(Level.TRACE, "\t"+message); }
+	public void data (String message) { _log(Level.DATA , "\""+message+"\""); }
 	
 	private void _log(Level level, String message) {
 		boolean enabled = _level.get() >= level.get();
 		if(enabled) _print(level.toString(), message);
-	}
-	
-	private void _log(boolean enabled, String level, String message) {
-		if(enabled) _print(level, message);
 	}
 	
 	private void _print(String level, String message) {

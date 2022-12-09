@@ -28,7 +28,7 @@ public class AppProperties {
 	}
 	
 	private Properties _loadProperties() {
-		logger.trace("AppProperties >> loadProperties");
+		logger.trace("AppProperties >> _loadProperties");
 		
 		String rootPath = Thread.currentThread()
 				.getContextClassLoader()
@@ -38,9 +38,9 @@ public class AppProperties {
 		properties = new Properties();
 		try {
 			properties.load(new FileInputStream(filePath));
-			logger.info("Properties loaded from '"+filePath+"'.");
+			logger.debug("Properties loaded from '"+filePath+"'.");
 		} catch(Exception e) {
-			logger.fatal(e);
+			logger.fatal("Failed fo load properties from '"+filePath+"'.", e);
 		}
 		
 		return properties;

@@ -21,7 +21,7 @@ import util.Logger;
 public class MainWindow {
 
 	private static Logger logger =
-			Logger.getInstance(Level.ALL, true, true);
+			Logger.getInstance(Level.TRACE);
 	
 //*/*************   Widgets   **************/**/
 /**/ protected static Shell shell;			/**/
@@ -42,18 +42,18 @@ public class MainWindow {
 		
 		Properties appProps = AppProperties
 				.getInstance().getProperties();
+		String levelStr = appProps.getProperty("logger.level");
+		Level level = Level.valueOf(levelStr);
+		logger = Logger.getInstance(level);
 		
-		logger = Logger.getInstance(
-				Level.valueOf(appProps.getProperty("logger.level")),
-				Boolean.parseBoolean(appProps.getProperty("logger.trace")),
-				Boolean.parseBoolean(appProps.getProperty("logger.data"))
-		);
+		logger.info("Logger level set to "+level.get()+" ("+levelStr+")");
+		
 		try {
 			MainWindow window =
 					new MainWindow();
 			window.open();
 		} catch (Exception e) {
-			logger.fatal(e);
+			logger.fatal("Failed to open window", e);
 		}
 	}
 
@@ -96,9 +96,10 @@ public class MainWindow {
 //*/****************************************/**/
 
 
+		logger.debug("MainWindow: Creating table...");
+		ViewService.init();
+
 //*********************************   Table   *********************************/
-/**/	logger.info("MainWindow: Creating table...");						/**/
-/**/																		/**/
 /**/	table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);			/**/
 /**/	table.setBounds(10, 10, 555, 630);									/**/
 /**/	table.setHeaderVisible(true);										/**/
@@ -132,15 +133,15 @@ public class MainWindow {
 /**/	tblclmn_description.setResizable(false);							/**/
 /**/	tblclmn_description.setWidth(260); 									/**/
 /**/	tblclmn_description.setText("Description");							/**/
-/**/																		/**/
-/**/	logger.info("MainWindow: Table created.");							/**/
 //*****************************************************************************/
+
+		logger.debug("MainWindow: Table created.");
 
 
 //*/*********************   Balance   **********************/**/
 /**/	Label lblTotBalance = new Label(shell, SWT.NONE);	/**/
 /**/	lblTotBalance.setBounds(585, 16, 116, 20);			/**/
-/**/	lblTotBalance.setText("Total balance (€):");		/**/
+/**/	lblTotBalance.setText("Total balance (ï¿½):");		/**/
 /**/														/**/
 /**/	textTotBalance = new Text(shell,					/**/
 /**/			SWT.BORDER | SWT.READ_ONLY | SWT.RIGHT);	/**/
@@ -177,7 +178,5 @@ public class MainWindow {
 		ViewService.initDateTimes();
 		ViewService.addEventListeners();
 		ViewService.updateInterface();
-		
-		logger.info("MainWindow: window contents created.");
 	}
 }

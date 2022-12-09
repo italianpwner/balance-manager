@@ -15,7 +15,7 @@ public class FileUtils {
 	
 	public static List<String> read(String fileName) {
 		logger.trace("FileUtils >> read");
-		logger.info("Reading from file '"+fileName+"'...");
+		logger.debug("Reading from file '"+fileName+"'...");
 		
 		BufferedReader reader = null;
 		List<String> list = new LinkedList<String>();
@@ -32,12 +32,12 @@ public class FileUtils {
 			}
 			
 		} catch(Exception e) {
-			logger.fatal(e);
+			logger.fatal("Failed to read from file '"+fileName+"'", e);
 		} finally {
 			try {
 				reader.close();
 			} catch(Exception e) {
-				logger.fatal(e);
+				logger.fatal("Failed to close reader", e);
 			}
 		}
 		
@@ -62,13 +62,13 @@ public class FileUtils {
 			}
 			
 		} catch(Exception e) {
-			logger.fatal(e);
+			logger.fatal("Failed to write to file '"+fileName+"'", e);
 		} finally {
 			try {
 				bw.close();
 				fw.close();
 			} catch(Exception e) {
-				logger.fatal(e);
+				logger.fatal("Failed to close writer", e);
 			}
 		}
 	}
@@ -87,13 +87,13 @@ public class FileUtils {
 			bw.write("");
 			
 		} catch(Exception e) {
-			logger.fatal(e);
+			logger.fatal("Failed to write to file '"+fileName+"'", e);
 		} finally {
 			try {
 				bw.close();
 				fw.close();
 			} catch(Exception e) {
-				logger.fatal(e);
+				logger.fatal("Failed to close writer", e);
 			}
 		}
 	}

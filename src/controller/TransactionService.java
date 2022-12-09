@@ -8,6 +8,7 @@ import java.util.Set;
 
 import model.Transaction;
 import persistence.TransactionDAO;
+import util.DateUtils;
 import util.Logger;
 
 public class TransactionService {
@@ -21,16 +22,16 @@ public class TransactionService {
 	
 	private static TransactionService instance;
 	private TransactionService() {
-		logger.info("TransactionService: creating cache...");
+		logger.debug("TransactionService: creating cache...");
 		
 		cache = new LinkedList<Transaction>();
 		categories = new HashSet<String>();
-		id = 0;
+		id = 1;
 
 		dao = TransactionDAO.getInstance();
 		_updateCache(dao.getAll());
 		
-		logger.info("TransactionService: cache created.");
+		logger.debug("TransactionService: cache created.");
 	}
 	
 	static TransactionService getInstance() {
@@ -47,26 +48,26 @@ public class TransactionService {
 		// TODO fix floating point errors
 		Double balance = 0.0;
 		for(Transaction t: cache)
-			balance += t.getAmount();
+			balance += Double.parseDouble(t.getAmount());
 		return balance;
 	}
 	
 	boolean loadNewTransactions() {
 		logger.trace("TransactionService >> loadNewTransactions");
-		logger.info("TransactionService: loading new transactions...");
+		logger.debug("TransactionService: loading new transactions...");
 		
 		List<String> data = dao.writeToCSV();
 		if(data.isEmpty())
 			return false;
 		else {
 			_updateCache(data);
-			logger.info("TransactionService: new transactions loaded.");
+			logger.debug("TransactionService: new transactions loaded.");
 		}
 		return true;
 	}
 	
 	private void _updateCache(List<String> data) {
-		logger.trace("TransactionService >> updateCache");
+		logger.trace("TransactionService >> _updateCache");
 		
 		for(String s: data) {
 			Transaction t = Transaction.make(s, id++);
@@ -83,23 +84,31 @@ public class TransactionService {
 	{
 		List<Transaction> list =
 				new LinkedList<Transaction>();
-		for(Transaction t: cache)
+		
+		for(Transaction t: cache) {
+			LocalDate tDate = DateUtils.convert(t.getDate());
+		
 			if(selectedCategories.contains(t.getCategory())
-				&& t.getDate().isAfter(from.minusDays(1))
-				&& t.getDate().isBefore(to.minusDays(1))
+				&& tDate.isAfter(from.minusDays(1))
+				&& tDate.isBefore(to.plusDays(1))
 			) {
 				list.add(t);
 			}
+		}
 		return list;
 	}
 	
+	private LocalDate _getDate(boolean first) {
+		if(cache.size() > 0) {
+			String date = first
+					? cache.get(0).getDate()
+					: cache.get(cache.size()-1).getDate();
+			return DateUtils.convert(date);
+		}
+		return LocalDate.now();
+	}
+	
+	LocalDate getFirstDate() { return _getDate(true) ; }
+	LocalDate getLastDate () { return _getDate(false); }
 	Set<String> getCategories() { return categories; }
-	
-	LocalDate getFirstDate() {
-		return cache.get(0).getDate();
-	}
-	
-	LocalDate getLastDate () {
-		return cache.get(cache.size()-1).getDate();
-	}
 }

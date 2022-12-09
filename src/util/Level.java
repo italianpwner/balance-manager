@@ -8,7 +8,8 @@ public enum Level {
 	WARN (3),
 	INFO (4),
 	DEBUG(5),
-	ALL  (6);
+	TRACE(6),
+	DATA (7);
 
 	private final int val;
 	private Level(int val) { this.val = val; }
