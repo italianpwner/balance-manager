@@ -1,5 +1,6 @@
 package controller;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -42,13 +43,16 @@ public class TransactionService {
 		return instance;
 	}
 	
-	Double getTotalBalance() {
+	BigDecimal getTotalBalance() {
 		logger.trace("TransactionService >> getTotalBalance");
 		
-		// TODO fix floating point errors
-		Double balance = 0.0;
-		for(Transaction t: cache)
-			balance += Double.parseDouble(t.getAmount());
+		BigDecimal balance =
+				new BigDecimal("0.0");
+		for(Transaction t: cache) {
+			BigDecimal tAmount =
+					new BigDecimal(t.getAmount());
+			balance = balance.add(tAmount);
+		}
 		return balance;
 	}
 	
