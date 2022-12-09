@@ -33,7 +33,7 @@ public class ViewService extends view.MainWindow {
 	}
 	
 	
-	public static void updateInterface() {
+	public static void updateInterface(boolean drawCheckboxes) {
 		logger.trace("ViewService >> updateInterface");
 
 		LocalDate from = DateUtils.convert(dateTimeFrom);
@@ -52,10 +52,12 @@ public class ViewService extends view.MainWindow {
 				.getCache(selectedCategories,from,to);
 		_updateTable(list);
 		
-		Set<String> set = new HashSet<String>();
-		for(Transaction t: list)
-			set.add(t.getCategory());
-		drawCheckboxes(set);
+		if(drawCheckboxes) {
+			Set<String> set = new HashSet<String>();
+			for(Transaction t: list)
+				set.add(t.getCategory());
+			drawCheckboxes(set);
+		}
 		
 		logger.debug("ViewService: Window contents updated");
 	}
@@ -99,7 +101,7 @@ public class ViewService extends view.MainWindow {
 				if(theresNewData) {
 					textTotBalance.setText(
 							service.getTotalBalance().toString());
-					updateInterface();
+					updateInterface(true);
 				}
 			}
 		});
@@ -111,7 +113,7 @@ public class ViewService extends view.MainWindow {
 			public void widgetSelected(SelectionEvent e) {
 				logger.trace("dateTimeFrom: updated");
 				logger.info("User updated 'dateTimeFrom'");
-				updateInterface();
+				updateInterface(true);
 			}
 		});
 		logger.debug("Added listener to DateTime 'dateTimeFrom'");
@@ -122,7 +124,7 @@ public class ViewService extends view.MainWindow {
 			public void widgetSelected(SelectionEvent e) {
 				logger.trace("dateTimeTo: updated");
 				logger.info("User updated 'dateTimeTo'");
-				updateInterface();
+				updateInterface(true);
 			}
 		});	
 		logger.debug("ViewService: Added listener to DateTime 'dateTimeTo'");
@@ -188,7 +190,7 @@ public class ViewService extends view.MainWindow {
 						if(selected) selectedCategories.add(category);
 						else selectedCategories.remove(category);
 						
-						updateInterface();
+						updateInterface(false);
 					}
 				});
 				

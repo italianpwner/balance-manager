@@ -177,6 +177,6 @@ public class MainWindow {
 		ViewService.initBalance();
 		ViewService.initDateTimes();
 		ViewService.addEventListeners();
-		ViewService.updateInterface();
+		ViewService.updateInterface(true);
 	}
 }
