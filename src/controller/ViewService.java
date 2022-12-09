@@ -7,10 +7,16 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 
 import model.Transaction;
 import util.DateUtils;
@@ -22,34 +28,36 @@ public class ViewService extends view.MainWindow {
 	static Logger logger = Logger.getInstance();
 	
 	static TransactionService service;
-	private static List<Button> categoryCheckboxes;
-	private static Set<String> selectedCategories;
+	private static List<Button> _categoryCheckboxes;
+	private static Set<String> _selectedCategories;
+	private static DateTime _calendarFrom;
+	private static DateTime _calendarTo;
 	
 	
 	public static void init() {
 		service = TransactionService.getInstance();
-		categoryCheckboxes = new LinkedList<Button>();
-		selectedCategories = service.getCategories();
+		_categoryCheckboxes = new LinkedList<Button>();
+		_selectedCategories = service.getCategories();
 	}
 	
 	
 	public static void updateInterface(boolean drawCheckboxes) {
 		logger.trace("ViewService >> updateInterface");
 
-		LocalDate from = DateUtils.convert(dateTimeFrom);
-		LocalDate  to  = DateUtils.convert(dateTimeTo);
+		LocalDate from = DateUtils.convert(textDateFrom.getText());
+		LocalDate  to  = DateUtils.convert(textDateTo.getText());
 
 		logger.debug("Selected date range: "+
 				DateUtils.toString(from) +" - "+
 				DateUtils.toString(to));
 		
 		logger.debug("Selected categories: {"+
-				StringUtils.toString(selectedCategories)+
+				StringUtils.toString(_selectedCategories)+
 		"}");
 		
 		
 		List<Transaction> list = service
-				.getCache(selectedCategories,from,to);
+				.getCache(_selectedCategories,from,to);
 		_updateTable(list);
 		
 		if(drawCheckboxes) {
@@ -105,51 +113,153 @@ public class ViewService extends view.MainWindow {
 				}
 			}
 		});
-		logger.debug("ViewService: Added listener to Button 'btnLoadNew'");
+		logger.debug("ViewService: SelectionListener added to 'btnLoadNew'");
 
 		
-		dateTimeFrom.addSelectionListener(new SelectionAdapter() {
+		textDateFrom.addMouseListener(new MouseAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				logger.trace("dateTimeFrom: updated");
-				logger.info("User updated 'dateTimeFrom'");
-				updateInterface(true);
+			public void mouseDown(MouseEvent e) {
+				logger.trace("textDateFrom: clicked");
+				logger.info("User clicked on 'textDateFrom'");
+				_openCalendar(textDateFrom, _calendarFrom);
 			}
 		});
-		logger.debug("Added listener to DateTime 'dateTimeFrom'");
+		logger.debug("ViewService: MouseListener added to 'textDateFrom'");
 		
 	
-		dateTimeTo.addSelectionListener(new SelectionAdapter() {
+		textDateTo.addMouseListener(new MouseAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				logger.trace("dateTimeTo: updated");
-				logger.info("User updated 'dateTimeTo'");
-				updateInterface(true);
+			public void mouseDown(MouseEvent e) {
+				logger.trace("textDateTo: clicked");
+				logger.info("User clicked on 'textDateTo'");
+				_openCalendar(textDateTo, _calendarTo);
 			}
-		});	
-		logger.debug("ViewService: Added listener to DateTime 'dateTimeTo'");
+		});
+		logger.debug("ViewService: MouseListener added to 'textDateTo'");
+		
+		
+		_calendarFrom.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {	// TODO find a better event
+				logger.trace("calendarFrom: clicked");
+				logger.info("User selected from 'calendarFrom'"+
+							"and updated 'textDateFrom'");
+				_closeCalendar(textDateFrom, _calendarFrom);
+			}
+		});
+		logger.debug("ViewService: SelectionListener added to '_calendarFrom'");
+		
+		
+		_calendarTo.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {	// TODO find a better event
+				logger.trace("calendarTo: clicked");
+				logger.info("User selected from 'calendarTo'"+
+							"and updated 'textDateTo'");
+				_closeCalendar(textDateTo, _calendarTo);
+			}
+		});
+		logger.debug("ViewService: SelectionListener added to '_calendarTo'");
 	}
 	
-	public static void initDateTimes() {
-		logger.trace("ViewService >> initDateTimes");
+	public static void initDates() {
+		logger.trace("ViewService >> initDates");
+		
+		// ====================   Bounds definition   ====================
+		java.util.Map<String, Integer> bounds = 
+				new java.util.HashMap<String, Integer>();
+
+		// **********   Width and height   **********
+		bounds.put("txt_w", 102);
+		bounds.put("cal_w", 225);
+		bounds.put("lbl_F_w", 40);
+		bounds.put("lbl_T_w", 20);
+		
+		bounds.put("txt_h",  28);		
+		bounds.put("cal_h", 145);		
+		bounds.put("lbl_h",  20);
+
+		// **************   X and Y   **************
+		int padding_x = 5;
+		int padding_y = 5;
+		int middle_padding = 50;
+		
+		bounds.put("lbl_F_x", 585);
+		bounds.put("lbl_y"  , 150);
+
+		bounds.put("date_y",   bounds.get("lbl_y") - padding_y);
+		
+		bounds.put("date_F_x", bounds.get("lbl_F_x") + bounds.get("lbl_F_w") + padding_x);
+		bounds.put("lbl_T_x", bounds.get("date_F_x") + bounds.get("cal_w") + middle_padding);
+		bounds.put("date_T_x", bounds.get("lbl_T_x") + bounds.get("lbl_T_w") + padding_x);
+		
+		
+		// ====================   Instantiation   ====================
+		Label lblFrom = new Label(shell, SWT.NONE);
+		Label lblTo   = new Label(shell, SWT.NONE);
+		
+		textDateFrom = new Text(shell, SWT.BORDER);
+		textDateTo   = new Text(shell, SWT.BORDER);
+		
+		_calendarFrom = new DateTime(shell, SWT.CALENDAR);
+		_calendarTo   = new DateTime(shell, SWT.CALENDAR);
+		
+		_calendarFrom.setVisible(false);
+		_calendarTo  .setVisible(false);
+
+		// ====================   Initialization   ====================
+		lblFrom.setText("From");
+		lblTo  .setText("To");
 		
 		LocalDate firstDate = service.getFirstDate();
-		dateTimeFrom.setDate(
+		LocalDate lastDate  = service.getLastDate();
+		
+		textDateFrom.setText(DateUtils.toString(firstDate));
+		textDateTo  .setText(DateUtils.toString(lastDate));
+		
+		_calendarFrom.setDate(
 				firstDate.getYear(),
 				firstDate.getMonthValue()-1,
 				firstDate.getDayOfMonth());
-
-		LocalDate lastDate = service.getLastDate();
-		dateTimeTo.setDate(
+		_calendarTo  .setDate(
 				lastDate.getYear(),
 				lastDate.getMonthValue()-1,
 				lastDate.getDayOfMonth());
+		
+		// ====================   Bounds setting   ====================
+		Rectangle rect = new Rectangle(
+				bounds.get("date_F_x"),
+				bounds.get("date_y"),
+				bounds.get("txt_w"),
+				bounds.get("txt_h"));
+		textDateFrom.setBounds(rect);
+
+		rect.x = bounds.get("date_T_x");
+		textDateTo.setBounds(rect);
+		
+		rect.width  = bounds.get("cal_w");
+		rect.height = bounds.get("cal_h");
+		_calendarTo.setBounds(rect);
+		
+		rect.x = bounds.get("date_F_x");
+		_calendarFrom.setBounds(rect);
+		
+		rect.y = bounds.get("lbl_y");
+		rect.height = bounds.get("lbl_h");
+		
+		rect.x = bounds.get("lbl_F_x");
+		rect.width = bounds.get("lbl_F_w");
+		lblFrom.setBounds(rect);
+		
+		rect.x = bounds.get("lbl_T_x");
+		rect.width = bounds.get("lbl_T_w");
+		lblTo.setBounds(rect);
 	}
 	
 	public static void drawCheckboxes(Set<String> set) {
 		logger.trace("ViewService >> drawCheckboxes");
 		
-		for(Button b: categoryCheckboxes)
+		for(Button b: _categoryCheckboxes)
 			b.dispose();
 		
 		String[] categories = new String[set.size()];
@@ -187,16 +297,32 @@ public class ViewService extends view.MainWindow {
 						logger.trace("btnCheckbox"+category+": "+action);
 						logger.info("User "+action+" CheckBox '"+category+"'");
 						
-						if(selected) selectedCategories.add(category);
-						else selectedCategories.remove(category);
+						if(selected) _selectedCategories.add(category);
+						else _selectedCategories.remove(category);
 						
 						updateInterface(false);
 					}
 				});
 				
-				selectedCategories.add(name);
-				categoryCheckboxes.add(b);
+				_selectedCategories.add(name);
+				_categoryCheckboxes.add(b);
 			}
 		}
+	}
+	
+	
+	private static void _openCalendar(Text date, DateTime calendar) {
+		logger.trace("ViewService >> _openCalendar");
+		    date.setVisible(false);
+		calendar.setVisible(true);
+	}
+	
+	private static void _closeCalendar(Text date, DateTime calendar) {
+		logger.trace("ViewService >> _closeCalendar");
+		    date.setVisible(true);
+		calendar.setVisible(false);
+		
+		date.setText(DateUtils.convert(calendar));
+		updateInterface(true);
 	}
 }

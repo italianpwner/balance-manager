@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.DateTime;
 public class DateUtils {
 	
 	private static final DateTimeFormatter formatter =
-			DateTimeFormatter.ofPattern("dd/MM/yyyy");
+			DateTimeFormatter.ofPattern("d/M/yyyy");
 	
 	public static LocalDate convert(String text) {
 		return LocalDate.parse(text, formatter);
@@ -18,10 +18,10 @@ public class DateUtils {
 		return date.format(formatter);
 	}
 	
-	public static LocalDate convert(DateTime d) {
-		return LocalDate.of(
-				d.getYear(), d.getMonth()+1, d.getDay()
-		);
+	public static String convert(DateTime d) {
+		return 	d.getDay()		+"/"+
+				(d.getMonth()+1)+"/"+
+				d.getYear();
 	}
 
 }

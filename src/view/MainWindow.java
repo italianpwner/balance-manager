@@ -5,7 +5,6 @@ import java.util.Properties;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -28,8 +27,8 @@ public class MainWindow {
 /**/ protected static Table table;			/**/
 /**/ protected static Text textTotBalance;	/**/
 /**/ protected static Button btnLoadNew;	/**/
-/**/ protected static DateTime dateTimeFrom;/**/
-/**/ protected static DateTime dateTimeTo;	/**/
+/**/ protected static Text textDateFrom;	/**/
+/**/ protected static Text textDateTo;		/**/
 //*/****************************************/**/
 
 	/**
@@ -141,7 +140,7 @@ public class MainWindow {
 //*/*********************   Balance   **********************/**/
 /**/	Label lblTotBalance = new Label(shell, SWT.NONE);	/**/
 /**/	lblTotBalance.setBounds(585, 16, 116, 20);			/**/
-/**/	lblTotBalance.setText("Total balance (ï¿½):");		/**/
+/**/	lblTotBalance.setText("Total balance (€):");		/**/
 /**/														/**/
 /**/	textTotBalance = new Text(shell,					/**/
 /**/			SWT.BORDER | SWT.READ_ONLY | SWT.RIGHT);	/**/
@@ -156,26 +155,9 @@ public class MainWindow {
 /**/	btnLoadNew.setText("Load new transactions");	/**/
 //*/****************************************************/**/
 
-
-//*/*************************   DateTimes   ************************/**/
-/**/	Label lblDateTimeFrom = new Label(shell, SWT.NONE);			/**/
-/**/	lblDateTimeFrom.setBounds(585, 150, 40, 20);				/**/
-/**/	lblDateTimeFrom.setText("From");							/**/
-/**/																/**/
-/**/	dateTimeFrom = new DateTime(shell, SWT.BORDER);				/**/
-/**/	dateTimeFrom.setBounds(631, 145, 102, 28);					/**/
-/**/																/**/
-/**/																/**/
-/**/	Label lblDateTimeTo = new Label(shell, SWT.NONE);			/**/
-/**/	lblDateTimeTo.setBounds(778, 150, 22, 20);					/**/
-/**/	lblDateTimeTo.setText("To");								/**/
-/**/																/**/
-/**/	dateTimeTo = new DateTime(shell, SWT.BORDER);				/**/
-/**/	dateTimeTo.setBounds(806, 145, 102, 28);					/**/
-//*/****************************************************************/**/
-
+		// TODO ViewService.initTable();
 		ViewService.initBalance();
-		ViewService.initDateTimes();
+		ViewService.initDates();
 		ViewService.addEventListeners();
 		ViewService.updateInterface(true);
 	}
