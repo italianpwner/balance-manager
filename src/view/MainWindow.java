@@ -9,7 +9,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import controller.ViewService;
@@ -94,49 +93,7 @@ public class MainWindow {
 /**/	shell.setMaximized(true);			/**/
 //*/****************************************/**/
 
-
-		logger.debug("MainWindow: Creating table...");
-		ViewService.init();
-
-//*********************************   Table   *********************************/
-/**/	table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);			/**/
-/**/	table.setBounds(10, 10, 555, 630);									/**/
-/**/	table.setHeaderVisible(true);										/**/
-/**/	table.setLinesVisible(true);										/**/
-/**/																		/**/
-/**/	TableColumn tblclmn_0 = new TableColumn(table, SWT.NONE);			/**/
-/**/	tblclmn_0.setResizable(false);										/**/
-/**/	tblclmn_0.setWidth(0);												/**/
-/**/																		/**/
-/**/	TableColumn tblclmn_id = new TableColumn(table, SWT.CENTER);		/**/
-/**/	tblclmn_id.setResizable(false);										/**/
-/**/	tblclmn_id.setWidth(30);											/**/
-/**/	tblclmn_id.setText("Id");											/**/
-/**/																		/**/
-/**/	TableColumn tblclmn_amount = new TableColumn(table, SWT.RIGHT);		/**/
-/**/	tblclmn_amount.setResizable(false);									/**/
-/**/	tblclmn_amount.setWidth(80);										/**/
-/**/	tblclmn_amount.setText("Amount");									/**/
-/**/																		/**/
-/**/	TableColumn tblclmn_date = new TableColumn(table, SWT.CENTER);		/**/
-/**/	tblclmn_date.setResizable(false);									/**/
-/**/	tblclmn_date.setWidth(90);											/**/
-/**/	tblclmn_date.setText("Date");										/**/
-/**/																		/**/
-/**/	TableColumn tblclmn_category = new TableColumn(table, SWT.LEFT);	/**/
-/**/	tblclmn_category.setResizable(false);								/**/
-/**/	tblclmn_category.setWidth(90);										/**/
-/**/	tblclmn_category.setText("Category");								/**/
-/**/																		/**/
-/**/	TableColumn tblclmn_description = new TableColumn(table, SWT.LEFT);	/**/
-/**/	tblclmn_description.setResizable(false);							/**/
-/**/	tblclmn_description.setWidth(260); 									/**/
-/**/	tblclmn_description.setText("Description");							/**/
-//*****************************************************************************/
-
-		logger.debug("MainWindow: Table created.");
-
-
+		
 //*/*********************   Balance   **********************/**/
 /**/	Label lblTotBalance = new Label(shell, SWT.NONE);	/**/
 /**/	lblTotBalance.setBounds(585, 16, 116, 20);			/**/
@@ -155,9 +112,7 @@ public class MainWindow {
 /**/	btnLoadNew.setText("Load new transactions");	/**/
 //*/****************************************************/**/
 
-		// TODO ViewService.initTable();
-		ViewService.initBalance();
-		ViewService.initDates();
+		ViewService.init();
 		ViewService.addEventListeners();
 		ViewService.updateInterface(true);
 	}

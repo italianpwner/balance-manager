@@ -15,6 +15,8 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
@@ -38,6 +40,37 @@ public class ViewService extends view.MainWindow {
 		service = TransactionService.getInstance();
 		_categoryCheckboxes = new LinkedList<Button>();
 		_selectedCategories = service.getCategories();
+		
+		logger.debug("ViewService: Creating table...");
+		_initTable();
+		logger.debug("ViewService: Table created.");
+		
+		_initBalance();
+		_initDates();
+	}
+	
+	
+	public static void _initTable() {
+		table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);	
+		table.setBounds(10, 10, 555, 630);
+		table.setHeaderVisible(true);
+		table.setLinesVisible(true);
+		
+		int[] width = {
+				0,			30,			80,
+				90,			90,			260
+		};
+		String[] text  = {
+				"",			"Id",		"Amount",
+				"Date",		"Category",	"Description"
+		};
+		
+		for(int i=0; i<width.length; i++) {
+			TableColumn col = new TableColumn(table, SWT.NONE);
+			col.setResizable(false);
+			col.setWidth(width[i]);
+			col.setText(text[i]);
+		}
 	}
 	
 	
@@ -88,7 +121,7 @@ public class ViewService extends view.MainWindow {
 	}
 	
 	
-	public static void initBalance() {
+	private static void _initBalance() {
 		logger.trace("ViewService >> initBalance");
 		textTotBalance.setText(
 				service.getTotalBalance().toString());
@@ -162,7 +195,7 @@ public class ViewService extends view.MainWindow {
 		logger.debug("ViewService: SelectionListener added to '_calendarTo'");
 	}
 	
-	public static void initDates() {
+	public static void _initDates() {
 		logger.trace("ViewService >> initDates");
 		
 		// ====================   Bounds definition   ====================
