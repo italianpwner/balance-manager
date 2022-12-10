@@ -2,10 +2,8 @@ package controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import model.Transaction;
 import persistence.TransactionDAO;
@@ -17,7 +15,6 @@ public class TransactionService {
 	static Logger logger = Logger.getInstance();
 	
 	private List<Transaction> cache;
-	private Set<String> categories;
 	private TransactionDAO dao;
 	private int id;
 	
@@ -26,7 +23,6 @@ public class TransactionService {
 		logger.debug("TransactionService: creating cache...");
 		
 		cache = new LinkedList<Transaction>();
-		categories = new HashSet<String>();
 		id = 1;
 
 		dao = TransactionDAO.getInstance();
@@ -76,24 +72,24 @@ public class TransactionService {
 		for(String s: data) {
 			Transaction t = Transaction.make(s, id++);
 			logger.data(t.toString());
-			
-			categories.add(t.getCategory());
 			cache.add(t);
+			
+			String category = t.getCategory();
+			if( ! ViewService.selectedCategories.keySet()
+					.contains(category)
+			)
+				ViewService.selectedCategories.put(category, true);
 		}
 	}
 
-	List<Transaction> getCache(
-			Set<String> selectedCategories,
-			LocalDate from, LocalDate to)
-	{
+	List<Transaction> getCache(LocalDate from, LocalDate to) {
 		List<Transaction> list =
 				new LinkedList<Transaction>();
 		
 		for(Transaction t: cache) {
 			LocalDate tDate = DateUtils.convert(t.getDate());
 		
-			if(selectedCategories.contains(t.getCategory())
-				&& tDate.isAfter(from.minusDays(1))
+			if(tDate.isAfter(from.minusDays(1))
 				&& tDate.isBefore(to.plusDays(1))
 			) {
 				list.add(t);
@@ -114,5 +110,5 @@ public class TransactionService {
 	
 	LocalDate getFirstDate() { return _getDate(true) ; }
 	LocalDate getLastDate () { return _getDate(false); }
-	Set<String> getCategories() { return categories; }
+	List<Transaction> getCache() { return cache; }
 }

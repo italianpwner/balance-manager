@@ -1,9 +1,11 @@
 package controller;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
@@ -30,16 +32,20 @@ public class ViewService extends view.MainWindow {
 	static Logger logger = Logger.getInstance();
 	
 	static TransactionService service;
+	static Map<String,Boolean> selectedCategories;
 	private static List<Button> _categoryCheckboxes;
-	private static Set<String> _selectedCategories;
 	private static DateTime _calendarFrom;
 	private static DateTime _calendarTo;
 	
 	
 	public static void init() {
-		service = TransactionService.getInstance();
 		_categoryCheckboxes = new LinkedList<Button>();
-		_selectedCategories = service.getCategories();
+		selectedCategories = new HashMap<String,Boolean>();
+
+		service = TransactionService.getInstance();
+		
+		for(Transaction t: service.getCache())
+			selectedCategories.put(t.getCategory(), true);
 		
 		logger.debug("ViewService: Creating table...");
 		_initTable();
@@ -74,6 +80,15 @@ public class ViewService extends view.MainWindow {
 	}
 	
 	
+	private static Set<String> _getSelectedCategories() {
+		Set<String> res = new HashSet<String>();
+		for(String category: selectedCategories.keySet())
+			if(selectedCategories.get(category))
+				res.add(category);
+		return res;
+	}
+	
+	
 	public static void updateInterface(boolean drawCheckboxes) {
 		logger.trace("ViewService >> updateInterface");
 
@@ -85,17 +100,17 @@ public class ViewService extends view.MainWindow {
 				DateUtils.toString(to));
 		
 		logger.debug("Selected categories: {"+
-				StringUtils.toString(_selectedCategories)+
+				StringUtils.toString(_getSelectedCategories())+
 		"}");
 		
 		
-		List<Transaction> list = service
-				.getCache(_selectedCategories,from,to);
-		_updateTable(list);
+		List<Transaction> filteredList = service
+				.getCache(from,to);
+		_updateTable(filteredList);
 		
 		if(drawCheckboxes) {
 			Set<String> set = new HashSet<String>();
-			for(Transaction t: list)
+			for(Transaction t: filteredList)
 				set.add(t.getCategory());
 			drawCheckboxes(set);
 		}
@@ -109,14 +124,17 @@ public class ViewService extends view.MainWindow {
 		
 		table.setItemCount(0);
 		for(int i=0; i<list.size(); i++) {
-			TableItem item = new TableItem(table, SWT.NONE);
 			Transaction t = list.get(i);
 			
-			item.setText(1, t.getId().toString());
-			item.setText(2, t.getAmount());
-			item.setText(3, t.getDate());
-			item.setText(4, t.getCategory());
-			item.setText(5, t.getDescription());
+			if(selectedCategories.get(t.getCategory())) {
+				TableItem item = new TableItem(table, SWT.NONE);
+				
+				item.setText(1, t.getId().toString());
+				item.setText(2, t.getAmount());
+				item.setText(3, t.getDate());
+				item.setText(4, t.getCategory());
+				item.setText(5, t.getDescription());
+			}
 		}
 	}
 	
@@ -318,26 +336,22 @@ public class ViewService extends view.MainWindow {
 				
 				String name = categories[3*i + j];
 				b.setText(name);
-				b.setSelection(true);
+				b.setSelection(selectedCategories.get(name));
 				
 				b.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
-						String category = b.getText();
 						boolean selected = b.getSelection();
 						
 						String action = (selected?"":"un")+"checked";
-						logger.trace("btnCheckbox"+category+": "+action);
-						logger.info("User "+action+" CheckBox '"+category+"'");
+						logger.trace("btnCheckbox"+name+": "+action);
+						logger.info("User "+action+" CheckBox '"+name+"'");
 						
-						if(selected) _selectedCategories.add(category);
-						else _selectedCategories.remove(category);
-						
+						selectedCategories.put(name,selected);
 						updateInterface(false);
 					}
 				});
 				
-				_selectedCategories.add(name);
 				_categoryCheckboxes.add(b);
 			}
 		}
