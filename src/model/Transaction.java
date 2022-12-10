@@ -43,7 +43,7 @@ public class Transaction {
 	@Override
 	public String toString() {
 		return String.format(
-				"{id: %03d, amount: %10s, date %s, category: %-12s, description: '%s'}",
+				"{id: %03d, amount: %10s, date: %s, category: %-12s, description: '%s'}",
 				id, amount, date, "'"+category+"'", description
 		);
 	}
