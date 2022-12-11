@@ -160,6 +160,10 @@ public class ViewService extends view.MainWindow {
 				if(theresNewData) {
 					textTotBalance.setText(
 							service.getTotalBalance().toString());
+					textDateFrom.setText(DateUtils.toString(
+							service.getFirstDate()));
+					textDateTo  .setText(DateUtils.toString(
+							service.getLastDate()));
 					updateInterface(true);
 				}
 			}
