@@ -18,40 +18,35 @@ import util.Logger;
 
 public class MainWindow {
 
-	private static Logger logger =
-			Logger.getInstance(Level.TRACE);
-	
-//*/*************   Widgets   **************/**/
-/**/ protected static Shell shell;			/**/
-/**/ protected static Table table;			/**/
-/**/ protected static Text textTotBalance;	/**/
-/**/ protected static Button btnLoadNew;	/**/
-/**/ protected static Text textDateFrom;	/**/
-/**/ protected static Text textDateTo;		/**/
-//*/****************************************/**/
+	protected static Shell shell;
+	protected static Table table;
+	protected static Text textTotBalance;
+	protected static Button btnLoadNew;
+	protected static Text textDateFrom;
+	protected static Text textDateTo;
 
 	/**
 	 * Launch the application.
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		logger.info("=== APPLICATION STARTED ===");
-		logger.trace("MainWindow >> main");
+		Logger.set(Level.INFO);
+		Logger.info("=== APPLICATION STARTED ===");
 		
 		Properties appProps = AppProperties
 				.getInstance().getProperties();
 		String levelStr = appProps.getProperty("logger.level");
 		Level level = Level.valueOf(levelStr);
-		logger = Logger.getInstance(level);
+		Logger.set(level);
 		
-		logger.info("Logger level set to "+level.get()+" ("+levelStr+")");
+		Logger.info("Logger level set to "+level.get()+" ("+levelStr+")");
 		
 		try {
 			MainWindow window =
 					new MainWindow();
 			window.open();
 		} catch (Exception e) {
-			logger.fatal("Failed to open window", e);
+			Logger.fatal("Failed to open window", e);
 		}
 	}
 
@@ -59,7 +54,7 @@ public class MainWindow {
 	 * Open the window.
 	 */
 	public void open() {
-		logger.trace("MainWindow >> open");
+		Logger.trace("MainWindow >> open");
 
 		Display display = Display.getDefault();
 		createContents();
@@ -76,7 +71,7 @@ public class MainWindow {
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
-		logger.trace("MainWindow >> createContents");
+		Logger.trace("MainWindow >> createContents");
 
 		
 //*/***************   Shell   **************/**/

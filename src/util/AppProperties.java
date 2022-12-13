@@ -5,15 +5,12 @@ import java.util.Properties;
 
 public class AppProperties {
 	
-	private static Logger logger =
-			Logger.getInstance();
-	
 	private static AppProperties instance;
 	private static Properties properties;
 	
 	private AppProperties() {}
 	public static AppProperties getInstance() {
-		logger.trace("AppProperties >> getInstance");
+		Logger.trace("AppProperties >> getInstance");
 		
 		if(instance == null)
 			instance = new AppProperties();
@@ -21,14 +18,14 @@ public class AppProperties {
 	}
 	
 	public Properties getProperties() {
-		logger.trace("AppProperties >> getProperties");
+		Logger.trace("AppProperties >> getProperties");
 		if(properties == null)
 			properties = _loadProperties();
 		return properties;
 	}
 	
 	private Properties _loadProperties() {
-		logger.trace("AppProperties >> _loadProperties");
+		Logger.trace("AppProperties >> _loadProperties");
 		
 		String rootPath = Thread.currentThread()
 				.getContextClassLoader()
@@ -38,9 +35,9 @@ public class AppProperties {
 		properties = new Properties();
 		try {
 			properties.load(new FileInputStream(filePath));
-			logger.debug("Properties loaded from '"+filePath+"'.");
+			Logger.debug("Properties loaded from '"+filePath+"'.");
 		} catch(Exception e) {
-			logger.fatal("Failed fo load properties from '"+filePath+"'.", e);
+			Logger.fatal("Failed fo load properties from '"+filePath+"'.", e);
 		}
 		
 		return properties;

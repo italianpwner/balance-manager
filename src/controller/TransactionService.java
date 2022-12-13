@@ -12,15 +12,13 @@ import util.Logger;
 
 public class TransactionService {
 	
-	static Logger logger = Logger.getInstance();
-
 	private List<Transaction> cache;
 	private TransactionDAO dao;
 	private int id;
 	
 	private static TransactionService instance;
 	private TransactionService() {
-		logger.debug("TransactionService: creating cache...");
+		Logger.debug("TransactionService: creating cache...");
 		
 		cache = new LinkedList<Transaction>();
 		id = 1;
@@ -28,11 +26,11 @@ public class TransactionService {
 		dao = TransactionDAO.getInstance();
 		_updateCache(dao.getAll());
 		
-		logger.debug("TransactionService: cache created.");
+		Logger.debug("TransactionService: cache created.");
 	}
 	
 	static TransactionService getInstance() {
-		logger.trace("TransactionService >> getInstance");
+		Logger.trace("TransactionService >> getInstance");
 		
 		if(instance == null)
 			instance = new TransactionService();
@@ -40,7 +38,7 @@ public class TransactionService {
 	}
 	
 	BigDecimal getTotalBalance() {
-		logger.trace("TransactionService >> getTotalBalance");
+		Logger.trace("TransactionService >> getTotalBalance");
 		
 		BigDecimal balance =
 				new BigDecimal("0.0");
@@ -53,25 +51,25 @@ public class TransactionService {
 	}
 	
 	boolean loadNewTransactions() {
-		logger.trace("TransactionService >> loadNewTransactions");
-		logger.debug("TransactionService: loading new transactions...");
+		Logger.trace("TransactionService >> loadNewTransactions");
+		Logger.debug("TransactionService: loading new transactions...");
 		
 		List<String> data = dao.writeToCSV();
 		if(data.isEmpty())
 			return false;
 		else {
 			_updateCache(data);
-			logger.debug("TransactionService: new transactions loaded.");
+			Logger.debug("TransactionService: new transactions loaded.");
 		}
 		return true;
 	}
 	
 	private void _updateCache(List<String> data) {
-		logger.trace("TransactionService >> _updateCache");
+		Logger.trace("TransactionService >> _updateCache");
 		
 		for(String s: data) {
 			Transaction t = Transaction.make(s, id++);
-			logger.data(t.toString());
+			Logger.data(t.toString());
 			cache.add(t);
 			
 			CategoriesService categories =

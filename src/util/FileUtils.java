@@ -10,12 +10,9 @@ import java.util.List;
 
 public class FileUtils {
 	
-	private static Logger logger =
-			Logger.getInstance();
-	
 	public static List<String> read(String fileName) {
-		logger.trace("FileUtils >> read");
-		logger.debug("Reading from file '"+fileName+"'...");
+		Logger.trace("FileUtils >> read");
+		Logger.debug("Reading from file '"+fileName+"'...");
 		
 		BufferedReader reader = null;
 		List<String> list = new LinkedList<String>();
@@ -26,18 +23,18 @@ public class FileUtils {
 			
 			String line = reader.readLine();
 			while(line != null) {
-				logger.data(line);
+				Logger.data(line);
 				list.add(line);
 				line = reader.readLine();
 			}
 			
 		} catch(Exception e) {
-			logger.fatal("Failed to read from file '"+fileName+"'", e);
+			Logger.fatal("Failed to read from file '"+fileName+"'", e);
 		} finally {
 			try {
 				reader.close();
 			} catch(Exception e) {
-				logger.fatal("Failed to close reader", e);
+				Logger.fatal("Failed to close reader", e);
 			}
 		}
 		
@@ -45,8 +42,8 @@ public class FileUtils {
 	}
 	
 	public static void write(String fileName, List<String> data) {
-		logger.trace("FileUtils >> write");
-		logger.info("Writing to file '"+fileName+"'...");
+		Logger.trace("FileUtils >> write");
+		Logger.info("Writing to file '"+fileName+"'...");
 		
 		FileWriter fw = null;
 		BufferedWriter bw = null;
@@ -62,20 +59,20 @@ public class FileUtils {
 			}
 			
 		} catch(Exception e) {
-			logger.fatal("Failed to write to file '"+fileName+"'", e);
+			Logger.fatal("Failed to write to file '"+fileName+"'", e);
 		} finally {
 			try {
 				bw.close();
 				fw.close();
 			} catch(Exception e) {
-				logger.fatal("Failed to close writer", e);
+				Logger.fatal("Failed to close writer", e);
 			}
 		}
 	}
 	
 	public static void deleteContents(String fileName) {
-		logger.trace("FileUtils >> deleteContents");
-		logger.info("Deleting contents of file '"+fileName+"'...");
+		Logger.trace("FileUtils >> deleteContents");
+		Logger.info("Deleting contents of file '"+fileName+"'...");
 		
 		FileWriter fw = null;
 		BufferedWriter bw = null;
@@ -87,13 +84,13 @@ public class FileUtils {
 			bw.write("");
 			
 		} catch(Exception e) {
-			logger.fatal("Failed to write to file '"+fileName+"'", e);
+			Logger.fatal("Failed to write to file '"+fileName+"'", e);
 		} finally {
 			try {
 				bw.close();
 				fw.close();
 			} catch(Exception e) {
-				logger.fatal("Failed to close writer", e);
+				Logger.fatal("Failed to close writer", e);
 			}
 		}
 	}

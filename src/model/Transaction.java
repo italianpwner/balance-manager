@@ -4,9 +4,6 @@ import util.AppProperties;
 import util.Logger;
 
 public class Transaction {
-	
-	static Logger logger = Logger.getInstance();
-	
 	private int id;
 	private String amount;
 	private String date;
@@ -32,7 +29,7 @@ public class Transaction {
 			String file = AppProperties
 					.getInstance().getProperties()
 					.getProperty("files.name.transactions");
-			logger.error("Invalid data '"+data+"' at line "+id+" of '"+file+
+			Logger.error("Invalid data '"+data+"' at line "+id+" of '"+file+
 					"' (expected <amount>;<date>;<category>;<description>)");
 		}
 		return new Transaction(

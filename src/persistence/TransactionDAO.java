@@ -8,17 +8,14 @@ import util.FileUtils;
 import util.Logger;
 
 public class TransactionDAO {
-	
-	private static Logger logger =
-			Logger.getInstance();
-	
+
 	private static TransactionDAO instance;
 	private static String fileName_newTransactions;
 	private static String fileName_transactions;
 	
 	private TransactionDAO() {};
 	public static TransactionDAO getInstance() {
-		logger.trace("TransactionDAO >> getInstance");
+		Logger.trace("TransactionDAO >> getInstance");
 		if(instance == null) {
 			instance = new TransactionDAO();
 			
@@ -35,7 +32,7 @@ public class TransactionDAO {
 	}
 	
 	public List<String> getAll() {
-		logger.trace("TransactionDAO >> getAll");
+		Logger.trace("TransactionDAO >> getAll");
 		return FileUtils.read(fileName_transactions);
 	}
 
@@ -44,9 +41,9 @@ public class TransactionDAO {
 				FileUtils.read(fileName_newTransactions);
 		
 		if(data.isEmpty())
-			logger.info("TransactionDAO: no new transactions.");
+			Logger.info("TransactionDAO: no new transactions.");
 		else {
-			logger.trace("TransactionDAO >> writeToCSV");
+			Logger.trace("TransactionDAO >> writeToCSV");
 			
 			FileUtils.write(fileName_transactions, data);
 			FileUtils.deleteContents(fileName_newTransactions);
