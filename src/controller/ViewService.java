@@ -1,11 +1,8 @@
 package controller;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
@@ -31,29 +28,16 @@ public class ViewService extends view.MainWindow {
 	
 	static Logger logger = Logger.getInstance();
 	
-	static TransactionService service;
-	private static DateTime calendarFrom;
-	private static DateTime calendarTo;
+	private TransactionService transactionService;
+	private CategoriesService categories;
+	private DateTime calendarFrom;
+	private DateTime calendarTo;
 	
-	// Categories checkboxes handling
-	private static Map<String,Boolean> selectedCategories;
-	private static List<Button> categoryCheckboxes;
-	private static int categories_perLine    =   4;
-	private static int categories_startPosX  = 585;
-	private static int categories_startPosY  =  70;
-	private static int categories_incrementX = 100;
-	private static int categories_incrementY =  20;
-	private static int[] nextButtonCoords = {
-			categories_startPosX, categories_startPosY
-	};
-	
-	
-	public static void init() {
-		categoryCheckboxes = new LinkedList<Button>();
-		selectedCategories = new HashMap<String,Boolean>();
+	public ViewService() {
 		
-		service = TransactionService.getInstance();
-		
+		transactionService = TransactionService.getInstance();
+		categories = CategoriesService.getInstance();
+
 		logger.debug("ViewService: Creating table...");
 		initTable();
 		logger.debug("ViewService: Table created.");
@@ -66,7 +50,7 @@ public class ViewService extends view.MainWindow {
 	}
 	
 	
-	private static void initTable() {
+	private void initTable() {
 		logger.trace("ViewService >> initTable");
 		
 		table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);	
@@ -92,16 +76,7 @@ public class ViewService extends view.MainWindow {
 	}
 	
 	
-	private static Set<String> getSelectedCategories() {
-		Set<String> res = new HashSet<String>();
-		for(String category: selectedCategories.keySet())
-			if(selectedCategories.get(category))
-				res.add(category);
-		return res;
-	}
-	
-	
-	private static void updateInterface() {
+	private void updateInterface() {
 		logger.trace("ViewService >> updateInterface");
 
 		LocalDate from = DateUtils.convert(textDateFrom.getText());
@@ -112,11 +87,11 @@ public class ViewService extends view.MainWindow {
 				DateUtils.toString(to));
 		
 		logger.debug("Selected categories: {"+
-				StringUtils.toString(getSelectedCategories())+
+				StringUtils.toString(categories.getSelected())+
 		"}");
 		
 		
-		List<Transaction> filteredList = service
+		List<Transaction> filteredList = transactionService
 				.getCache(from,to);
 		
 		Set<String> categoriesInFilteredList =
@@ -126,7 +101,7 @@ public class ViewService extends view.MainWindow {
 		for(Transaction t: filteredList) {
 			
 			// *****************   Update table   ****************
-			if(selectedCategories.get(t.getCategory())) {
+			if(categories.isSelected(t.getCategory())) {
 				TableItem item = new TableItem(table, SWT.NONE);
 				
 				item.setText(1, t.getId().toString());
@@ -140,7 +115,7 @@ public class ViewService extends view.MainWindow {
 			categoriesInFilteredList.add(t.getCategory());
 		}
 		
-		for(Button b: categoryCheckboxes)
+		for(Button b: categories.getCheckboxes())
 				b.setEnabled(
 						categoriesInFilteredList
 						.contains(b.getText()));
@@ -149,14 +124,14 @@ public class ViewService extends view.MainWindow {
 	}
 	
 	
-	private static void initBalance() {
+	private void initBalance() {
 		logger.trace("ViewService >> initBalance");
 		textTotBalance.setText(
-				service.getTotalBalance().toString());
+				transactionService.getTotalBalance().toString());
 	}
 	
 	
-	private static void addEventListeners() {
+	private void addEventListeners() {
 		logger.trace("ViewService >> addEventListeners");
 		
 		btnLoadNew.addSelectionListener(new SelectionAdapter() {
@@ -166,27 +141,18 @@ public class ViewService extends view.MainWindow {
 				logger.info("User clicked on 'btnLoadNew'");
 				
 				boolean theresNewData =
-						service.loadNewTransactions();
+						transactionService.loadNewTransactions();
 				if(theresNewData) {
 					textTotBalance.setText(
-							service.getTotalBalance().toString());
+							transactionService.getTotalBalance().toString());
 					textDateFrom.setText(DateUtils.toString(
-							service.getFirstDate()));
+							transactionService.getFirstDate()));
 					textDateTo  .setText(DateUtils.toString(
-							service.getLastDate()));
+							transactionService.getLastDate()));
 					
-					Set<String> allCategories =
-							service.getAllCategories();
-					if(selectedCategories.size()
-						!= allCategories.size())
-					{
-						for(String category: allCategories)
-							if( ! selectedCategories.keySet()
-									.contains(category))
-							{
-								selectedCategories.put(category, true);
-								createCategoryButton(category);
-							}
+					for(String category: categories.getNew()) {
+						categories.set(category, true);
+						createCategoryButton(category);
 					}
 					
 					updateInterface();
@@ -242,7 +208,7 @@ public class ViewService extends view.MainWindow {
 		logger.debug("ViewService: SelectionListener added to '_calendarTo'");
 	}
 	
-	private static void initDates() {
+	private void initDates() {
 		logger.trace("ViewService >> initDates");
 		
 		// ====================   Bounds definition   ====================
@@ -291,8 +257,8 @@ public class ViewService extends view.MainWindow {
 		lblFrom.setText("From");
 		lblTo  .setText("To");
 		
-		LocalDate firstDate = service.getFirstDate();
-		LocalDate lastDate  = service.getLastDate();
+		LocalDate firstDate = transactionService.getFirstDate();
+		LocalDate lastDate  = transactionService.getLastDate();
 		
 		textDateFrom.setText(DateUtils.toString(firstDate));
 		textDateTo  .setText(DateUtils.toString(lastDate));
@@ -336,29 +302,26 @@ public class ViewService extends view.MainWindow {
 		lblTo.setBounds(rect);
 	}
 	
-	private static void initCategories() {
+	private void initCategories() {
 		logger.trace("ViewService >> initCategories");
 		
-		for(Transaction t: service.getCache())
-			selectedCategories.put(t.getCategory(), true);
+		for(Transaction t: transactionService.getCache())
+			categories.set(t.getCategory(), true);
 		
-		for(String name : selectedCategories.keySet())
+		for(String name : categories.get())
 			createCategoryButton(name);
 	}
 	
 	
-	private static void createCategoryButton(String name) {
-		logger.trace("ViewService >> createCategoryButton -> computeNextButtonCoords");
+	void createCategoryButton(String name) {
+		logger.trace("ViewService >> createCategoryButton");
 		Button b = new Button(shell, SWT.CHECK);
 		
-		b.setBounds(
-				nextButtonCoords[0],
-				nextButtonCoords[1],
-				70, 20);
-		computeNextButtonCoords();
+		int[] position = categories.getNextButtonCoords();
+		b.setBounds(position[0], position[1], 70, 20);
 		
 		b.setText(name);
-		b.setSelection(selectedCategories.get(name));
+		b.setSelection(categories.isSelected(name));
 		
 		b.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -369,34 +332,22 @@ public class ViewService extends view.MainWindow {
 				logger.trace("btnCheckbox"+name+": "+action);
 				logger.info("User "+action+" CheckBox '"+name+"'");
 				
-				selectedCategories.put(name,selected);
+				categories.set(name,selected);
 				updateInterface();
 			}
 		});
 		
-		categoryCheckboxes.add(b);
+		categories.addButton(b);
 	}
 	
 	
-	private static void computeNextButtonCoords() {		
-		int max_X = categories_startPosX +
-				categories_incrementX*(categories_perLine-1);
-		if(nextButtonCoords[0] == max_X) {
-			nextButtonCoords[0] = categories_startPosX;
-			nextButtonCoords[1] += categories_incrementY;
-		}
-		else
-			nextButtonCoords[0] += categories_incrementX;
-	}
-	
-	
-	private static void openCalendar(Text date, DateTime calendar) {
+	private void openCalendar(Text date, DateTime calendar) {
 		logger.trace("ViewService >> openCalendar");
 		    date.setVisible(false);
 		calendar.setVisible(true);
 	}
 	
-	private static void closeCalendar(Text date, DateTime calendar) {
+	private void closeCalendar(Text date, DateTime calendar) {
 		logger.trace("ViewService >> closeCalendar");
 		    date.setVisible(true);
 		calendar.setVisible(false);

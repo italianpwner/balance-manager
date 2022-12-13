@@ -112,6 +112,6 @@ public class MainWindow {
 /**/	btnLoadNew.setText("Load new transactions");	/**/
 //*/****************************************************/**/
 
-		ViewService.init();
+		new ViewService();
 	}
 }

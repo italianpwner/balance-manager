@@ -2,10 +2,8 @@ package controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import model.Transaction;
 import persistence.TransactionDAO;
@@ -16,7 +14,6 @@ public class TransactionService {
 	
 	static Logger logger = Logger.getInstance();
 
-	private Set<String> allCategories;
 	private List<Transaction> cache;
 	private TransactionDAO dao;
 	private int id;
@@ -25,7 +22,6 @@ public class TransactionService {
 	private TransactionService() {
 		logger.debug("TransactionService: creating cache...");
 		
-		allCategories = new HashSet<String>();
 		cache = new LinkedList<Transaction>();
 		id = 1;
 
@@ -78,8 +74,12 @@ public class TransactionService {
 			logger.data(t.toString());
 			cache.add(t);
 			
+			CategoriesService categories =
+					CategoriesService.getInstance();
 			String category = t.getCategory();
-			allCategories.add(category);
+			
+			if(categories.isNew(category))
+				categories.set(category, null);
 		}
 	}
 
@@ -99,8 +99,6 @@ public class TransactionService {
 		}
 		return filteredList;
 	}
-
-	Set<String> getAllCategories() { return allCategories; }
 	
 	LocalDate getFirstDate() { return _getDate(true) ; }
 	LocalDate getLastDate () { return _getDate(false); }
