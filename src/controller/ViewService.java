@@ -32,31 +32,31 @@ public class ViewService extends view.MainWindow {
 	static Logger logger = Logger.getInstance();
 	
 	static TransactionService service;
-	static Map<String,Boolean> selectedCategories;
-	private static List<Button> _categoryCheckboxes;
-	private static DateTime _calendarFrom;
-	private static DateTime _calendarTo;
+	static Map<String,Boolean> selectedCategories = new HashMap<String,Boolean>();
+	private static List<Button> categoryCheckboxes = new LinkedList<Button>();
+	private static DateTime calendarFrom;
+	private static DateTime calendarTo;
 	
 	
 	public static void init() {
-		_categoryCheckboxes = new LinkedList<Button>();
-		selectedCategories = new HashMap<String,Boolean>();
 
 		service = TransactionService.getInstance();
 		
-		for(Transaction t: service.getCache())
-			selectedCategories.put(t.getCategory(), true);
-		
 		logger.debug("ViewService: Creating table...");
-		_initTable();
+		initTable();
 		logger.debug("ViewService: Table created.");
 		
-		_initBalance();
-		_initDates();
+		initBalance();
+		initDates();
+		initCategories();
+		addEventListeners();
+		updateInterface();
 	}
 	
 	
-	public static void _initTable() {
+	private static void initTable() {
+		logger.trace("ViewService >> initTable");
+		
 		table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);	
 		table.setBounds(10, 10, 555, 630);
 		table.setHeaderVisible(true);
@@ -80,7 +80,7 @@ public class ViewService extends view.MainWindow {
 	}
 	
 	
-	private static Set<String> _getSelectedCategories() {
+	private static Set<String> getSelectedCategories() {
 		Set<String> res = new HashSet<String>();
 		for(String category: selectedCategories.keySet())
 			if(selectedCategories.get(category))
@@ -89,7 +89,7 @@ public class ViewService extends view.MainWindow {
 	}
 	
 	
-	public static void updateInterface(boolean drawCheckboxes) {
+	private static void updateInterface() {
 		logger.trace("ViewService >> updateInterface");
 
 		LocalDate from = DateUtils.convert(textDateFrom.getText());
@@ -100,32 +100,20 @@ public class ViewService extends view.MainWindow {
 				DateUtils.toString(to));
 		
 		logger.debug("Selected categories: {"+
-				StringUtils.toString(_getSelectedCategories())+
+				StringUtils.toString(getSelectedCategories())+
 		"}");
 		
 		
 		List<Transaction> filteredList = service
 				.getCache(from,to);
-		_updateTable(filteredList);
 		
-		if(drawCheckboxes) {
-			Set<String> set = new HashSet<String>();
-			for(Transaction t: filteredList)
-				set.add(t.getCategory());
-			drawCheckboxes(set);
-		}
-		
-		logger.debug("ViewService: Window contents updated");
-	}
-	
-	
-	private static void _updateTable(List<Transaction> list) {
-		logger.trace("ViewService >> updateTable");
-		
+		Set<String> categoriesInFilteredList =
+				new HashSet<String>();
 		table.setItemCount(0);
-		for(int i=0; i<list.size(); i++) {
-			Transaction t = list.get(i);
+		
+		for(Transaction t: filteredList) {
 			
+			// *****************   Update table   ****************
 			if(selectedCategories.get(t.getCategory())) {
 				TableItem item = new TableItem(table, SWT.NONE);
 				
@@ -135,18 +123,28 @@ public class ViewService extends view.MainWindow {
 				item.setText(4, t.getCategory());
 				item.setText(5, t.getDescription());
 			}
+			
+			// **************   Update checkboxes   **************
+			categoriesInFilteredList.add(t.getCategory());
 		}
+		
+		for(Button b: categoryCheckboxes)
+				b.setEnabled(
+						categoriesInFilteredList
+						.contains(b.getText()));
+		
+		logger.debug("ViewService: Window contents updated");
 	}
 	
 	
-	private static void _initBalance() {
+	private static void initBalance() {
 		logger.trace("ViewService >> initBalance");
 		textTotBalance.setText(
 				service.getTotalBalance().toString());
 	}
 	
 	
-	public static void addEventListeners() {
+	private static void addEventListeners() {
 		logger.trace("ViewService >> addEventListeners");
 		
 		btnLoadNew.addSelectionListener(new SelectionAdapter() {
@@ -176,7 +174,7 @@ public class ViewService extends view.MainWindow {
 			public void mouseDown(MouseEvent e) {
 				logger.trace("textDateFrom: clicked");
 				logger.info("User clicked on 'textDateFrom'");
-				_openCalendar(textDateFrom, _calendarFrom);
+				openCalendar(textDateFrom, calendarFrom);
 			}
 		});
 		logger.debug("ViewService: MouseListener added to 'textDateFrom'");
@@ -187,37 +185,37 @@ public class ViewService extends view.MainWindow {
 			public void mouseDown(MouseEvent e) {
 				logger.trace("textDateTo: clicked");
 				logger.info("User clicked on 'textDateTo'");
-				_openCalendar(textDateTo, _calendarTo);
+				openCalendar(textDateTo, calendarTo);
 			}
 		});
 		logger.debug("ViewService: MouseListener added to 'textDateTo'");
 		
 		
-		_calendarFrom.addMouseListener(new MouseAdapter() {
+		calendarFrom.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDoubleClick(MouseEvent e) {	// TODO find a better event
 				logger.trace("calendarFrom: clicked");
 				logger.info("User selected from 'calendarFrom'"+
 							"and updated 'textDateFrom'");
-				_closeCalendar(textDateFrom, _calendarFrom);
+				closeCalendar(textDateFrom, calendarFrom);
 			}
 		});
 		logger.debug("ViewService: SelectionListener added to '_calendarFrom'");
 		
 		
-		_calendarTo.addMouseListener(new MouseAdapter() {
+		calendarTo.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDoubleClick(MouseEvent e) {	// TODO find a better event
 				logger.trace("calendarTo: clicked");
 				logger.info("User selected from 'calendarTo'"+
 							"and updated 'textDateTo'");
-				_closeCalendar(textDateTo, _calendarTo);
+				closeCalendar(textDateTo, calendarTo);
 			}
 		});
 		logger.debug("ViewService: SelectionListener added to '_calendarTo'");
 	}
 	
-	public static void _initDates() {
+	private static void initDates() {
 		logger.trace("ViewService >> initDates");
 		
 		// ====================   Bounds definition   ====================
@@ -256,11 +254,11 @@ public class ViewService extends view.MainWindow {
 		textDateFrom = new Text(shell, SWT.BORDER);
 		textDateTo   = new Text(shell, SWT.BORDER);
 		
-		_calendarFrom = new DateTime(shell, SWT.CALENDAR);
-		_calendarTo   = new DateTime(shell, SWT.CALENDAR);
+		calendarFrom = new DateTime(shell, SWT.CALENDAR);
+		calendarTo   = new DateTime(shell, SWT.CALENDAR);
 		
-		_calendarFrom.setVisible(false);
-		_calendarTo  .setVisible(false);
+		calendarFrom.setVisible(false);
+		calendarTo  .setVisible(false);
 
 		// ====================   Initialization   ====================
 		lblFrom.setText("From");
@@ -272,11 +270,11 @@ public class ViewService extends view.MainWindow {
 		textDateFrom.setText(DateUtils.toString(firstDate));
 		textDateTo  .setText(DateUtils.toString(lastDate));
 		
-		_calendarFrom.setDate(
+		calendarFrom.setDate(
 				firstDate.getYear(),
 				firstDate.getMonthValue()-1,
 				firstDate.getDayOfMonth());
-		_calendarTo  .setDate(
+		calendarTo  .setDate(
 				lastDate.getYear(),
 				lastDate.getMonthValue()-1,
 				lastDate.getDayOfMonth());
@@ -294,10 +292,10 @@ public class ViewService extends view.MainWindow {
 		
 		rect.width  = bounds.get("cal_w");
 		rect.height = bounds.get("cal_h");
-		_calendarTo.setBounds(rect);
+		calendarTo.setBounds(rect);
 		
 		rect.x = bounds.get("date_F_x");
-		_calendarFrom.setBounds(rect);
+		calendarFrom.setBounds(rect);
 		
 		rect.y = bounds.get("lbl_y");
 		rect.height = bounds.get("lbl_h");
@@ -311,14 +309,14 @@ public class ViewService extends view.MainWindow {
 		lblTo.setBounds(rect);
 	}
 	
-	public static void drawCheckboxes(Set<String> set) {
-		logger.trace("ViewService >> drawCheckboxes");
+	private static void initCategories() {
+		logger.trace("ViewService >> initCategories");
 		
-		for(Button b: _categoryCheckboxes)
-			b.dispose();
+		for(Transaction t: service.getCache())
+			selectedCategories.put(t.getCategory(), true);
 		
-		String[] categories = new String[set.size()];
-		categories = set.toArray(categories);
+		String[] categories = new String[selectedCategories.size()];
+		categories = selectedCategories.keySet().toArray(categories);
 		
 		// {start,increment}
 		int[] x = {585,135};
@@ -352,28 +350,28 @@ public class ViewService extends view.MainWindow {
 						logger.info("User "+action+" CheckBox '"+name+"'");
 						
 						selectedCategories.put(name,selected);
-						updateInterface(false);
+						updateInterface();
 					}
 				});
 				
-				_categoryCheckboxes.add(b);
+				categoryCheckboxes.add(b);
 			}
 		}
 	}
 	
 	
-	private static void _openCalendar(Text date, DateTime calendar) {
-		logger.trace("ViewService >> _openCalendar");
+	private static void openCalendar(Text date, DateTime calendar) {
+		logger.trace("ViewService >> openCalendar");
 		    date.setVisible(false);
 		calendar.setVisible(true);
 	}
 	
-	private static void _closeCalendar(Text date, DateTime calendar) {
-		logger.trace("ViewService >> _closeCalendar");
+	private static void closeCalendar(Text date, DateTime calendar) {
+		logger.trace("ViewService >> closeCalendar");
 		    date.setVisible(true);
 		calendar.setVisible(false);
 		
 		date.setText(DateUtils.convert(calendar));
-		updateInterface(true);
+		updateInterface();
 	}
 }

@@ -113,7 +113,5 @@ public class MainWindow {
 //*/****************************************************/**/
 
 		ViewService.init();
-		ViewService.addEventListeners();
-		ViewService.updateInterface(true);
 	}
 }
