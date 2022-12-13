@@ -2,8 +2,10 @@ package controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import model.Transaction;
 import persistence.TransactionDAO;
@@ -13,7 +15,8 @@ import util.Logger;
 public class TransactionService {
 	
 	static Logger logger = Logger.getInstance();
-	
+
+	private Set<String> allCategories;
 	private List<Transaction> cache;
 	private TransactionDAO dao;
 	private int id;
@@ -22,6 +25,7 @@ public class TransactionService {
 	private TransactionService() {
 		logger.debug("TransactionService: creating cache...");
 		
+		allCategories = new HashSet<String>();
 		cache = new LinkedList<Transaction>();
 		id = 1;
 
@@ -75,15 +79,13 @@ public class TransactionService {
 			cache.add(t);
 			
 			String category = t.getCategory();
-			if( ! ViewService.selectedCategories.keySet()
-					.contains(category)
-			)
-				ViewService.selectedCategories.put(category, true);
+			allCategories.add(category);
 		}
 	}
 
+	List<Transaction> getCache() { return cache; }
 	List<Transaction> getCache(LocalDate from, LocalDate to) {
-		List<Transaction> list =
+		List<Transaction> filteredList =
 				new LinkedList<Transaction>();
 		
 		for(Transaction t: cache) {
@@ -92,12 +94,16 @@ public class TransactionService {
 			if(tDate.isAfter(from.minusDays(1))
 				&& tDate.isBefore(to.plusDays(1))
 			) {
-				list.add(t);
+				filteredList.add(t);
 			}
 		}
-		return list;
+		return filteredList;
 	}
+
+	Set<String> getAllCategories() { return allCategories; }
 	
+	LocalDate getFirstDate() { return _getDate(true) ; }
+	LocalDate getLastDate () { return _getDate(false); }
 	private LocalDate _getDate(boolean first) {
 		if(cache.size() > 0) {
 			String date = first
@@ -108,7 +114,4 @@ public class TransactionService {
 		return LocalDate.now();
 	}
 	
-	LocalDate getFirstDate() { return _getDate(true) ; }
-	LocalDate getLastDate () { return _getDate(false); }
-	List<Transaction> getCache() { return cache; }
 }

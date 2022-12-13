@@ -32,14 +32,26 @@ public class ViewService extends view.MainWindow {
 	static Logger logger = Logger.getInstance();
 	
 	static TransactionService service;
-	static Map<String,Boolean> selectedCategories = new HashMap<String,Boolean>();
-	private static List<Button> categoryCheckboxes = new LinkedList<Button>();
 	private static DateTime calendarFrom;
 	private static DateTime calendarTo;
 	
+	// Categories checkboxes handling
+	private static Map<String,Boolean> selectedCategories;
+	private static List<Button> categoryCheckboxes;
+	private static int categories_perLine    =   4;
+	private static int categories_startPosX  = 585;
+	private static int categories_startPosY  =  70;
+	private static int categories_incrementX = 100;
+	private static int categories_incrementY =  20;
+	private static int[] nextButtonCoords = {
+			categories_startPosX, categories_startPosY
+	};
+	
 	
 	public static void init() {
-
+		categoryCheckboxes = new LinkedList<Button>();
+		selectedCategories = new HashMap<String,Boolean>();
+		
 		service = TransactionService.getInstance();
 		
 		logger.debug("ViewService: Creating table...");
@@ -162,7 +174,22 @@ public class ViewService extends view.MainWindow {
 							service.getFirstDate()));
 					textDateTo  .setText(DateUtils.toString(
 							service.getLastDate()));
-					updateInterface(true);
+					
+					Set<String> allCategories =
+							service.getAllCategories();
+					if(selectedCategories.size()
+						!= allCategories.size())
+					{
+						for(String category: allCategories)
+							if( ! selectedCategories.keySet()
+									.contains(category))
+							{
+								selectedCategories.put(category, true);
+								createCategoryButton(category);
+							}
+					}
+					
+					updateInterface();
 				}
 			}
 		});
@@ -315,48 +342,51 @@ public class ViewService extends view.MainWindow {
 		for(Transaction t: service.getCache())
 			selectedCategories.put(t.getCategory(), true);
 		
-		String[] categories = new String[selectedCategories.size()];
-		categories = selectedCategories.keySet().toArray(categories);
+		for(String name : selectedCategories.keySet())
+			createCategoryButton(name);
+	}
+	
+	
+	private static void createCategoryButton(String name) {
+		logger.trace("ViewService >> createCategoryButton -> computeNextButtonCoords");
+		Button b = new Button(shell, SWT.CHECK);
 		
-		// {start,increment}
-		int[] x = {585,135};
-		int[] y = { 70, 20};
+		b.setBounds(
+				nextButtonCoords[0],
+				nextButtonCoords[1],
+				70, 20);
+		computeNextButtonCoords();
 		
-		int num_cat = categories.length;
-		int i_max = num_cat/3 +
-				(num_cat%3 != 0 ? 1 : 0);
-		int j_max = 3;
-		int k = 0;
+		b.setText(name);
+		b.setSelection(selectedCategories.get(name));
 		
-		for(int i=0; i<i_max; i++) {
-			for(int j=0; j<j_max && k<num_cat; j++, k++) {
-				Button b = new Button(shell, SWT.CHECK);
-				b.setBounds(
-						x[0] + j*x[1],
-						y[0] + i*y[1],
-						111, 20);
+		b.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				boolean selected = b.getSelection();
 				
-				String name = categories[3*i + j];
-				b.setText(name);
-				b.setSelection(selectedCategories.get(name));
+				String action = (selected?"":"un")+"checked";
+				logger.trace("btnCheckbox"+name+": "+action);
+				logger.info("User "+action+" CheckBox '"+name+"'");
 				
-				b.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						boolean selected = b.getSelection();
-						
-						String action = (selected?"":"un")+"checked";
-						logger.trace("btnCheckbox"+name+": "+action);
-						logger.info("User "+action+" CheckBox '"+name+"'");
-						
-						selectedCategories.put(name,selected);
-						updateInterface();
-					}
-				});
-				
-				categoryCheckboxes.add(b);
+				selectedCategories.put(name,selected);
+				updateInterface();
 			}
+		});
+		
+		categoryCheckboxes.add(b);
+	}
+	
+	
+	private static void computeNextButtonCoords() {		
+		int max_X = categories_startPosX +
+				categories_incrementX*(categories_perLine-1);
+		if(nextButtonCoords[0] == max_X) {
+			nextButtonCoords[0] = categories_startPosX;
+			nextButtonCoords[1] += categories_incrementY;
 		}
+		else
+			nextButtonCoords[0] += categories_incrementX;
 	}
 	
 	
