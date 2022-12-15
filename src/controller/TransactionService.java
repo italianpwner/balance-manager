@@ -11,20 +11,22 @@ import util.DateUtils;
 import util.Logger;
 
 public class TransactionService {
-	
+
+	private CategoriesService categories;
 	private List<Transaction> cache;
 	private TransactionDAO dao;
 	private int id;
-	
+
 	private static TransactionService instance;
 	private TransactionService() {
 		Logger.debug("TransactionService: creating cache...");
 		
+		categories = CategoriesService.getInstance();
 		cache = new LinkedList<Transaction>();
 		id = 1;
 
 		dao = TransactionDAO.getInstance();
-		_updateCache(dao.getAll());
+		updateCache(dao.getAll());
 		
 		Logger.debug("TransactionService: cache created.");
 	}
@@ -58,22 +60,20 @@ public class TransactionService {
 		if(data.isEmpty())
 			return false;
 		else {
-			_updateCache(data);
+			updateCache(data);
 			Logger.debug("TransactionService: new transactions loaded.");
 		}
 		return true;
 	}
 	
-	private void _updateCache(List<String> data) {
-		Logger.trace("TransactionService >> _updateCache");
+	private void updateCache(List<String> data) {
+		Logger.trace("TransactionService >> updateCache");
 		
 		for(String s: data) {
 			Transaction t = Transaction.make(s, id++);
 			Logger.data(t.toString());
 			cache.add(t);
 			
-			CategoriesService categories =
-					CategoriesService.getInstance();
 			String category = t.getCategory();
 			
 			if(categories.isNew(category))
@@ -98,9 +98,9 @@ public class TransactionService {
 		return filteredList;
 	}
 	
-	LocalDate getFirstDate() { return _getDate(true) ; }
-	LocalDate getLastDate () { return _getDate(false); }
-	private LocalDate _getDate(boolean first) {
+	LocalDate getFirstDate() { return getDate(true) ; }
+	LocalDate getLastDate () { return getDate(false); }
+	private LocalDate getDate(boolean first) {
 		if(cache.size() > 0) {
 			String date = first
 					? cache.get(0).getDate()

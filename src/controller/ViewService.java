@@ -1,5 +1,6 @@
 package controller;
 
+import java.awt.Toolkit;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -10,10 +11,11 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -25,51 +27,212 @@ import util.Logger;
 import util.StringUtils;
 
 public class ViewService extends view.MainWindow {
-	
-	private TransactionService transactionService;
+		
+	private TransactionService service;
 	private CategoriesService categories;
-	private DateTime calendarFrom;
-	private DateTime calendarTo;
 	
 	public ViewService() {
-		
-		transactionService = TransactionService.getInstance();
-		categories = CategoriesService.getInstance();
 
-		Logger.debug("ViewService: Creating table...");
-		initTable();
-		Logger.debug("ViewService: Table created.");
+		instantiateWidgets();
 		
-		initBalance();
-		initDates();
+		categories = CategoriesService.getInstance();
+		setWidgetsSize();
+		setWidgetsLocation();
+
+		service = TransactionService.getInstance();
+		configureWidgets();
+		
 		initCategories();
 		addEventListeners();
 		updateInterface();
 	}
 	
-	
-	private void initTable() {
-		Logger.trace("ViewService >> initTable");
+	private void instantiateWidgets() {
+		Logger.trace("ViewService >> instantiateWidgets");
+
+		shell = new Shell(); // TODO review SWT styles
 		
-		table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);	
-		table.setBounds(10, 10, 555, 630);
+		btnLoadNew = new Button(shell, SWT.NONE);
+		lblTotal   = new Label (shell, SWT.NONE);
+		lblFrom    = new Label (shell, SWT.NONE);
+		lblTo      = new Label (shell, SWT.NONE);
+
+		textTotal	 = new Text(shell, SWT.BORDER | SWT.READ_ONLY | SWT.RIGHT);
+		textDateFrom = new Text(shell, SWT.BORDER);
+		textDateTo   = new Text(shell, SWT.BORDER);
+		
+		calendarFrom = new DateTime(shell, SWT.CALENDAR);
+		calendarTo   = new DateTime(shell, SWT.CALENDAR);
+
+		table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
+		for(int i=0; i<NUM_COLUMNS; i++)
+			new TableColumn(table, SWT.NONE);
+	}
+	
+	
+	private void setWidgetsSize() {
+		Logger.trace("ViewService >> setWidgetsSize");
+
+		Point p = new Point(0,0);
+		java.awt.Dimension screen = Toolkit
+				.getDefaultToolkit()
+				.getScreenSize();
+		
+		shell.setSize(
+				(int)screen.getWidth(),
+				(int)screen.getHeight()
+		);
+		
+		table	  .setSize(600, 630);
+		btnLoadNew.setSize(140,  30);
+		textTotal .setSize( 78,  20);
+		
+		p.y = 20;
+		lblTotal.setSize(90, p.y);
+		lblFrom	.setSize(30, p.y);
+		lblTo	.setSize(15, p.y);
+
+		p.x = 70; p.y = 20;
+		textDateFrom.setSize(p);
+		textDateTo	.setSize(p);
+		
+		p.x = 225; p.y = 145;
+		calendarFrom.setSize(p);
+		calendarTo	.setSize(p);
+		
+		int[] column_width = {0, 30, 80, 90, 90, 260};
+		for(int i=0; i<NUM_COLUMNS; i++)
+			table.getColumn(i).setWidth(column_width[i]);
+		
+		categories.setCheckboxSize(70, 20);
+	}
+
+	
+	private void setWidgetsLocation() {
+		Logger.trace("ViewService >> setWidgetsLocation");
+		
+		int smallPadding = 10;
+		int bigPadding  = 2 * smallPadding;
+		categories.setIncrement(100, 20);
+		categories.perLine(4);
+		
+		table.setLocation(
+				smallPadding,
+				smallPadding);
+		
+		lblTotal.setLocation(
+				table.getLocation().x
+				+ table.getSize().x
+				+ bigPadding,
+				smallPadding
+				+ (btnLoadNew.getSize().y
+					- lblTotal.getSize().y) / 2
+				+ lblTotal.getSize().y / 8);
+		
+		textTotal.setLocation(
+				lblTotal.getLocation().x
+				+ lblTotal.getSize().x
+				+ bigPadding,
+				smallPadding
+				+ (btnLoadNew.getSize().y
+					- lblTotal.getSize().y) / 2);
+		
+		btnLoadNew.setLocation(
+				textTotal.getLocation().x
+				+ textTotal.getSize().x
+				+ bigPadding,
+				smallPadding);
+		
+		lblFrom.setLocation(
+				lblTotal.getLocation().x,
+				lblTotal.getLocation().y
+				+ lblTotal.getSize().y
+				+ bigPadding
+				+ lblFrom.getSize().y / 8);
+		
+		textDateFrom.setLocation(
+				lblFrom.getLocation().x
+				+ lblFrom.getSize().x
+				+ smallPadding,
+				lblFrom.getLocation().y
+				- lblFrom.getSize().y / 8);
+		
+		calendarFrom.setLocation(
+				textDateFrom.getLocation().x,
+				textDateFrom.getLocation().y);
+
+		lblTo.setLocation(
+				calendarFrom.getLocation().x
+				+ calendarFrom.getSize().x
+				+ smallPadding,
+				lblFrom.getLocation().y);
+		
+		textDateTo.setLocation(
+				lblTo.getLocation().x
+				+ lblTo.getSize().x
+				+ smallPadding,
+				textDateFrom.getLocation().y);
+		
+		calendarTo.setLocation(
+				textDateTo.getLocation().x,
+				textDateTo.getLocation().y);
+		
+		categories.setStartingLocation(
+				lblFrom.getLocation().x,
+				textDateFrom.getLocation().y
+				+ 2*textDateFrom.getSize().y
+				+ bigPadding);
+		
+		categories.setNextButtonLocation();
+	}
+	
+	
+	private void configureWidgets() {
+		Logger.trace("ViewService >> configureWidgets");
+		
+		shell.setText("Balance Manager");
+		shell.setMaximized(true);
+		
+		btnLoadNew.setText("Load new transactions");
+		lblTotal.setText("Total balance (€):");
+		lblFrom.setText("From");
+		lblTo.setText("To");
+		
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		
-		int[] width = {
-				0,			30,			80,
-				90,			90,			260
-		};
-		String[] text  = {
-				"",			"Id",		"Amount",
-				"Date",		"Category",	"Description"
-		};
+		String    balance   = service.getTotalBalance().toString();
+		LocalDate firstDate = service.getFirstDate();
+		LocalDate lastDate  = service.getLastDate();
 		
-		for(int i=0; i<width.length; i++) {
-			TableColumn col = new TableColumn(table, SWT.NONE);
+		textTotal.setText(balance);
+		textTotal.setEditable(false);
+		
+		textDateFrom.setText(DateUtils.toString(firstDate));
+		textDateTo  .setText(DateUtils.toString(lastDate));
+
+		calendarFrom.setVisible(false);
+		calendarFrom.setDate(
+				firstDate.getYear(),
+				firstDate.getMonthValue()-1,
+				firstDate.getDayOfMonth());
+
+		calendarTo.setVisible(false);
+		calendarTo.setDate(
+				lastDate.getYear(),
+				lastDate.getMonthValue()-1,
+				lastDate.getDayOfMonth());
+		
+		
+		String[] column_text  = {
+				"", "Id", "Amount", "Date",
+				"Category", "Description"
+		};
+		for(int i=0; i<NUM_COLUMNS; i++) {
+			TableColumn col = table.getColumn(i);
+			
 			col.setResizable(false);
-			col.setWidth(width[i]);
-			col.setText(text[i]);
+			col.setText(column_text[i]);
 		}
 	}
 	
@@ -78,7 +241,7 @@ public class ViewService extends view.MainWindow {
 		Logger.trace("ViewService >> updateInterface");
 
 		LocalDate from = DateUtils.convert(textDateFrom.getText());
-		LocalDate  to  = DateUtils.convert(textDateTo.getText());
+		LocalDate  to  = DateUtils.convert(textDateTo  .getText());
 
 		Logger.debug("Selected date range: "+
 				DateUtils.toString(from) +" - "+
@@ -89,13 +252,15 @@ public class ViewService extends view.MainWindow {
 		"}");
 		
 		
-		List<Transaction> filteredList = transactionService
+		List<Transaction> filteredList = service
 				.getCache(from,to);
 		
 		Set<String> categoriesInFilteredList =
 				new HashSet<String>();
-		table.setItemCount(0);
+
+		Logger.debug("ViewService: Creating table...");
 		
+		table.setItemCount(0);
 		for(Transaction t: filteredList) {
 			
 			// *****************   Update table   ****************
@@ -113,7 +278,9 @@ public class ViewService extends view.MainWindow {
 			categoriesInFilteredList.add(t.getCategory());
 		}
 		
-		for(Button b: categories.getCheckboxes())
+		Logger.debug("ViewService: Table created.");
+		
+		for(Button b: checkboxes)
 				b.setEnabled(
 						categoriesInFilteredList
 						.contains(b.getText()));
@@ -121,12 +288,6 @@ public class ViewService extends view.MainWindow {
 		Logger.debug("ViewService: Window contents updated");
 	}
 	
-	
-	private void initBalance() {
-		Logger.trace("ViewService >> initBalance");
-		textTotBalance.setText(
-				transactionService.getTotalBalance().toString());
-	}
 	
 	
 	private void addEventListeners() {
@@ -139,18 +300,20 @@ public class ViewService extends view.MainWindow {
 				Logger.info("User clicked on 'btnLoadNew'");
 				
 				boolean theresNewData =
-						transactionService.loadNewTransactions();
+						service.loadNewTransactions();
 				if(theresNewData) {
-					textTotBalance.setText(
-							transactionService.getTotalBalance().toString());
-					textDateFrom.setText(DateUtils.toString(
-							transactionService.getFirstDate()));
-					textDateTo  .setText(DateUtils.toString(
-							transactionService.getLastDate()));
+					textTotal.setText(service
+							.getTotalBalance().toString());
+					textDateFrom.setText(
+							DateUtils.toString(service
+							.getFirstDate()));
+					textDateTo  .setText(
+							DateUtils.toString(service
+							.getLastDate()));
 					
 					for(String category: categories.getNew()) {
 						categories.set(category, true);
-						createCategoryButton(category);
+						createCategoryCheckbox(category);
 					}
 					
 					updateInterface();
@@ -191,7 +354,7 @@ public class ViewService extends view.MainWindow {
 				closeCalendar(textDateFrom, calendarFrom);
 			}
 		});
-		Logger.debug("ViewService: SelectionListener added to '_calendarFrom'");
+		Logger.debug("ViewService: SelectionListener added to 'calendarFrom'");
 		
 		
 		calendarTo.addMouseListener(new MouseAdapter() {
@@ -203,120 +366,27 @@ public class ViewService extends view.MainWindow {
 				closeCalendar(textDateTo, calendarTo);
 			}
 		});
-		Logger.debug("ViewService: SelectionListener added to '_calendarTo'");
+		Logger.debug("ViewService: SelectionListener added to 'calendarTo'");
 	}
 	
-	private void initDates() {
-		Logger.trace("ViewService >> initDates");
-		
-		// ====================   Bounds definition   ====================
-		java.util.Map<String, Integer> bounds = 
-				new java.util.HashMap<String, Integer>();
 
-		// **********   Width and height   **********
-		bounds.put("txt_w", 102);
-		bounds.put("cal_w", 225);
-		bounds.put("lbl_F_w", 40);
-		bounds.put("lbl_T_w", 20);
-		
-		bounds.put("txt_h",  28);		
-		bounds.put("cal_h", 145);		
-		bounds.put("lbl_h",  20);
-
-		// **************   X and Y   **************
-		int padding_x = 5;
-		int padding_y = 5;
-		int middle_padding = 50;
-		
-		bounds.put("lbl_F_x", 585);
-		bounds.put("lbl_y"  , 150);
-
-		bounds.put("date_y",   bounds.get("lbl_y") - padding_y);
-		
-		bounds.put("date_F_x", bounds.get("lbl_F_x") + bounds.get("lbl_F_w") + padding_x);
-		bounds.put("lbl_T_x", bounds.get("date_F_x") + bounds.get("cal_w") + middle_padding);
-		bounds.put("date_T_x", bounds.get("lbl_T_x") + bounds.get("lbl_T_w") + padding_x);
-		
-		
-		// ====================   Instantiation   ====================
-		Label lblFrom = new Label(shell, SWT.NONE);
-		Label lblTo   = new Label(shell, SWT.NONE);
-		
-		textDateFrom = new Text(shell, SWT.BORDER);
-		textDateTo   = new Text(shell, SWT.BORDER);
-		
-		calendarFrom = new DateTime(shell, SWT.CALENDAR);
-		calendarTo   = new DateTime(shell, SWT.CALENDAR);
-		
-		calendarFrom.setVisible(false);
-		calendarTo  .setVisible(false);
-
-		// ====================   Initialization   ====================
-		lblFrom.setText("From");
-		lblTo  .setText("To");
-		
-		LocalDate firstDate = transactionService.getFirstDate();
-		LocalDate lastDate  = transactionService.getLastDate();
-		
-		textDateFrom.setText(DateUtils.toString(firstDate));
-		textDateTo  .setText(DateUtils.toString(lastDate));
-		
-		calendarFrom.setDate(
-				firstDate.getYear(),
-				firstDate.getMonthValue()-1,
-				firstDate.getDayOfMonth());
-		calendarTo  .setDate(
-				lastDate.getYear(),
-				lastDate.getMonthValue()-1,
-				lastDate.getDayOfMonth());
-		
-		// ====================   Bounds setting   ====================
-		Rectangle rect = new Rectangle(
-				bounds.get("date_F_x"),
-				bounds.get("date_y"),
-				bounds.get("txt_w"),
-				bounds.get("txt_h"));
-		textDateFrom.setBounds(rect);
-
-		rect.x = bounds.get("date_T_x");
-		textDateTo.setBounds(rect);
-		
-		rect.width  = bounds.get("cal_w");
-		rect.height = bounds.get("cal_h");
-		calendarTo.setBounds(rect);
-		
-		rect.x = bounds.get("date_F_x");
-		calendarFrom.setBounds(rect);
-		
-		rect.y = bounds.get("lbl_y");
-		rect.height = bounds.get("lbl_h");
-		
-		rect.x = bounds.get("lbl_F_x");
-		rect.width = bounds.get("lbl_F_w");
-		lblFrom.setBounds(rect);
-		
-		rect.x = bounds.get("lbl_T_x");
-		rect.width = bounds.get("lbl_T_w");
-		lblTo.setBounds(rect);
-	}
-	
-	private void initCategories() {
+	public void initCategories() {
 		Logger.trace("ViewService >> initCategories");
 		
-		for(Transaction t: transactionService.getCache())
+		for(Transaction t: service.getCache())
 			categories.set(t.getCategory(), true);
-		
+
 		for(String name : categories.get())
-			createCategoryButton(name);
+			createCategoryCheckbox(name);
 	}
 	
 	
-	void createCategoryButton(String name) {
-		Logger.trace("ViewService >> createCategoryButton");
+	private void createCategoryCheckbox(String name) {
+		Logger.trace("ViewService >> createCategoryCheckbox");
 		Button b = new Button(shell, SWT.CHECK);
 		
-		int[] position = categories.getNextButtonCoords();
-		b.setBounds(position[0], position[1], 70, 20);
+		b.setLocation(categories.getNextButtonLocation());
+		b.setSize(categories.getSize());
 		
 		b.setText(name);
 		b.setSelection(categories.isSelected(name));
@@ -335,7 +405,7 @@ public class ViewService extends view.MainWindow {
 			}
 		});
 		
-		categories.addButton(b);
+		checkboxes.add(b);
 	}
 	
 	
@@ -345,6 +415,7 @@ public class ViewService extends view.MainWindow {
 		calendar.setVisible(true);
 	}
 	
+	// TODO close calendar if clicked outside
 	private void closeCalendar(Text date, DateTime calendar) {
 		Logger.trace("ViewService >> closeCalendar");
 		    date.setVisible(true);

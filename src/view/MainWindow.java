@@ -1,10 +1,11 @@
 package view;
 
-import java.awt.Toolkit;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -17,13 +18,29 @@ import util.Level;
 import util.Logger;
 
 public class MainWindow {
+	
+	@SuppressWarnings("unused")
+	private static ViewService service;
+	
+	protected static Shell  shell;
+	
+	protected static final int NUM_COLUMNS = 6;
+	protected static Table  table;
+	
+	protected static Label lblTotal;
+	protected static Text  textTotal;
 
-	protected static Shell shell;
-	protected static Table table;
-	protected static Text textTotBalance;
+	protected static Label lblFrom;
+	protected static Text  textDateFrom;
+
+	protected static Label lblTo;
+	protected static Text  textDateTo;
+	
+	protected static DateTime calendarFrom;
+	protected static DateTime calendarTo;
+
 	protected static Button btnLoadNew;
-	protected static Text textDateFrom;
-	protected static Text textDateTo;
+	protected static List<Button> checkboxes;
 
 	/**
 	 * Launch the application.
@@ -33,17 +50,11 @@ public class MainWindow {
 		Logger.set(Level.INFO);
 		Logger.info("=== APPLICATION STARTED ===");
 		
-		Properties appProps = AppProperties
-				.getInstance().getProperties();
-		String levelStr = appProps.getProperty("logger.level");
-		Level level = Level.valueOf(levelStr);
-		Logger.set(level);
-		
-		Logger.info("Logger level set to "+level.get()+" ("+levelStr+")");
+		initLogger();
+		checkboxes = new LinkedList<Button>();
 		
 		try {
-			MainWindow window =
-					new MainWindow();
+			MainWindow window = new MainWindow();
 			window.open();
 		} catch (Exception e) {
 			Logger.fatal("Failed to open window", e);
@@ -60,53 +71,30 @@ public class MainWindow {
 		createContents();
 		shell.open();
 		shell.layout();
+		
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();
 			}
 		}
 	}
-
+	
 	/**
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
 		Logger.trace("MainWindow >> createContents");
-
+		service = new ViewService();
+	}
+	
+	private static void initLogger() {
+		Logger.trace("MainWindow >> initLogger");
+		Properties appProps = AppProperties
+				.getInstance().getProperties();
+		String levelStr = appProps.getProperty("logger.level");
+		Level level = Level.valueOf(levelStr);
+		Logger.set(level);
 		
-//*/***************   Shell   **************/**/
-/**/	shell = new Shell();				/**/
-/**/	shell.setText("Balance Manager");	/**/
-/**/										/**/
-/**/	java.awt.Dimension size = Toolkit	/**/
-/**/			.getDefaultToolkit()		/**/
-/**/			.getScreenSize();			/**/
-/**/										/**/
-/**/	shell.setSize(						/**/
-/**/			(int)size.getWidth(),		/**/
-/**/			(int)size.getHeight());		/**/
-/**/	shell.setMaximized(true);			/**/
-//*/****************************************/**/
-
-		
-//*/*********************   Balance   **********************/**/
-/**/	Label lblTotBalance = new Label(shell, SWT.NONE);	/**/
-/**/	lblTotBalance.setBounds(585, 16, 116, 20);			/**/
-/**/	lblTotBalance.setText("Total balance (€):");		/**/
-/**/														/**/
-/**/	textTotBalance = new Text(shell,					/**/
-/**/			SWT.BORDER | SWT.READ_ONLY | SWT.RIGHT);	/**/
-/**/	textTotBalance.setEditable(false);					/**/
-/**/	textTotBalance.setBounds(707, 13, 78, 26);			/**/
-//*/********************************************************/**/
-
-
-//*/******************   LoadButton   ******************/**/
-/**/	btnLoadNew = new Button(shell, SWT.NONE);		/**/
-/**/	btnLoadNew.setBounds(823, 10, 160, 30);			/**/
-/**/	btnLoadNew.setText("Load new transactions");	/**/
-//*/****************************************************/**/
-
-		new ViewService();
+		Logger.info("Logger level set to "+level.get()+" ("+levelStr+")");
 	}
 }

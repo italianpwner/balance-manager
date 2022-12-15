@@ -32,6 +32,7 @@ public class Logger {
 		if(enabled) _print(level.toString(), message);
 	}
 	
+	// TODO write to file instead of System.out
 	private static void _print(String level, String message) {
 		SimpleDateFormat sdf =
 				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
