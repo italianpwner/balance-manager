@@ -33,18 +33,19 @@ public class TransactionDAO {
 	
 	public List<String> getAll() {
 		Logger.trace("TransactionDAO >> getAll");
+		// TODO validate dates and floats
 		return FileUtils.read(fileName_transactions);
 	}
 
 	public List<String> writeToCSV() {
+		// TODO call from dao
+		Logger.trace("TransactionDAO >> writeToCSV");
 		List<String> data =
 				FileUtils.read(fileName_newTransactions);
 		
 		if(data.isEmpty())
 			Logger.info("TransactionDAO: no new transactions.");
 		else {
-			Logger.trace("TransactionDAO >> writeToCSV");
-			
 			FileUtils.write(fileName_transactions, data);
 			FileUtils.deleteContents(fileName_newTransactions);
 		}

@@ -57,7 +57,6 @@ public class CategoriesService {
 	}
 	
 	boolean isNew(String category) {
-		Logger.trace("CategoriesService >> isNew");
 		return ! categories.containsKey(category);
 	}
 	
@@ -88,7 +87,7 @@ public class CategoriesService {
 	Point getSize() { return size; }
 	void perLine(int n) { checkboxesPerLine = n; }
 	
-	void setCheckboxSize(int x, int y) { size = new Point(x,y); }
+	void setSize(int x, int y) { size = new Point(x,y); }
 	void setStartingLocation(int x, int y) { startPos = new Point(x,y); }
 	void setIncrement(int x, int y) { increment = new Point(x,y); }
 	

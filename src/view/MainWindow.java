@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -22,10 +23,11 @@ public class MainWindow {
 	@SuppressWarnings("unused")
 	private static ViewService service;
 	
-	protected static Shell  shell;
+	protected static Shell   shell;
+	protected static Display display;
 	
 	protected static final int NUM_COLUMNS = 6;
-	protected static Table  table;
+	protected static Table table;
 	
 	protected static Label lblTotal;
 	protected static Text  textTotal;
@@ -41,6 +43,8 @@ public class MainWindow {
 
 	protected static Button btnLoadNew;
 	protected static List<Button> checkboxes;
+	
+	protected static Canvas canvas;
 
 	/**
 	 * Launch the application.
@@ -67,7 +71,7 @@ public class MainWindow {
 	public void open() {
 		Logger.trace("MainWindow >> open");
 
-		Display display = Display.getDefault();
+		display = Display.getDefault();
 		createContents();
 		shell.open();
 		shell.layout();
@@ -84,7 +88,7 @@ public class MainWindow {
 	 */
 	protected void createContents() {
 		Logger.trace("MainWindow >> createContents");
-		service = new ViewService();
+		service = ViewService.getInstance();
 	}
 	
 	private static void initLogger() {
