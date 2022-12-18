@@ -12,7 +12,7 @@ import util.Logger;
 
 public class TransactionService {
 
-	private CategoriesService categories;
+	private CategoriesService categoriesService;
 	private List<Transaction> cache;
 	private TransactionDAO dao;
 	private int id;
@@ -21,7 +21,7 @@ public class TransactionService {
 	private TransactionService() {
 		Logger.debug("TransactionService: creating cache...");
 		
-		categories = CategoriesService.getInstance();
+		categoriesService = CategoriesService.getInstance();
 		cache = new LinkedList<Transaction>();
 		id = 1;
 
@@ -73,11 +73,8 @@ public class TransactionService {
 			Transaction t = Transaction.make(s, id++);
 			Logger.data(t.toString());
 			cache.add(t);
-			
-			String category = t.getCategory();
-			
-			if(categories.isNew(category))
-				categories.set(category, null);
+			categoriesService.updateCategories(
+					t.getCategory(), new BigDecimal(t.getAmount()), null);
 		}
 	}
 

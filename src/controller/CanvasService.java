@@ -31,12 +31,10 @@ public class CanvasService {
 		return instance;
 	}
 	
-	void addSnapshot(String amount) {
-		Logger.trace("CanvasService >> addSnapshot");
+	void addSnapshot(BigDecimal amount) {
 		BigDecimal last = snapshots
 				.get(snapshots.size()-1);
-		BigDecimal newBalance = last.add(
-				new BigDecimal(amount));
+		BigDecimal newBalance = last.add(amount);
 		snapshots.add(newBalance);
 		
 		if(newBalance.compareTo(max) == 1)

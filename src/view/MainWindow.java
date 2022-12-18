@@ -1,6 +1,5 @@
 package view;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -27,7 +26,8 @@ public class MainWindow {
 	protected static Display display;
 	
 	protected static final int NUM_COLUMNS = 6;
-	protected static Table table;
+	protected static Table transactionsTable;
+	protected static Table categoriesTable;
 	
 	protected static Label lblTotal;
 	protected static Text  textTotal;
@@ -49,13 +49,12 @@ public class MainWindow {
 	/**
 	 * Launch the application.
 	 * @param args
+	 * @wbp.parser.entryPoint
 	 */
 	public static void main(String[] args) {
 		Logger.set(Level.INFO);
 		Logger.info("=== APPLICATION STARTED ===");
-		
 		initLogger();
-		checkboxes = new LinkedList<Button>();
 		
 		try {
 			MainWindow window = new MainWindow();
@@ -67,6 +66,7 @@ public class MainWindow {
 
 	/**
 	 * Open the window.
+	 * @wbp.parser.entryPoint
 	 */
 	public void open() {
 		Logger.trace("MainWindow >> open");
@@ -85,10 +85,11 @@ public class MainWindow {
 	
 	/**
 	 * Create contents of the window.
+	 * @wbp.parser.entryPoint
 	 */
 	protected void createContents() {
 		Logger.trace("MainWindow >> createContents");
-		service = ViewService.getInstance();
+		service = ViewService.getInstance(); // TODO must refactor everything
 	}
 	
 	private static void initLogger() {

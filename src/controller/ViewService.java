@@ -1,8 +1,11 @@
 package controller;
 
 import java.awt.Toolkit;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -33,14 +36,14 @@ public class ViewService extends view.MainWindow {
 		
 	private TransactionService transactionService;
 	private CanvasService canvasService;
-	private CategoriesService categories;
+	private CategoriesService categoriesService;
 
 	private static ViewService instance;
 	private ViewService() {
 
 		instantiateWidgets();
 		
-		categories = CategoriesService.getInstance();
+		categoriesService = CategoriesService.getInstance();
 		canvasService = CanvasService.getInstance();
 		transactionService = TransactionService.getInstance();
 		
@@ -49,6 +52,7 @@ public class ViewService extends view.MainWindow {
 		configureWidgets();
 
 		initCategories();
+		setCanvasLocation();
 		addEventListeners();
 		updateInterface(true);
 	}
@@ -66,6 +70,7 @@ public class ViewService extends view.MainWindow {
 		Logger.trace("ViewService >> instantiateWidgets");
 
 		shell = new Shell(); // TODO review SWT styles
+		checkboxes = new LinkedList<Button>();
 		
 		btnLoadNew = new Button(shell, SWT.NONE);
 		lblTotal   = new Label (shell, SWT.NONE);
@@ -79,11 +84,13 @@ public class ViewService extends view.MainWindow {
 		calendarFrom = new DateTime(shell, SWT.CALENDAR);
 		calendarTo   = new DateTime(shell, SWT.CALENDAR);
 
-		table = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
-		for(int i=0; i<NUM_COLUMNS; i++)
-			new TableColumn(table, SWT.NONE);
-		
 		canvas = new Canvas(shell, SWT.BORDER);
+		
+		categoriesTable   = new Table(shell, SWT.BORDER | SWT.NO_SCROLL);
+		transactionsTable = new Table(shell, SWT.BORDER | SWT.FULL_SELECTION);
+		
+		for(int i=0; i<NUM_COLUMNS; i++)
+			new TableColumn(transactionsTable, SWT.NONE);
 	}
 	
 	
@@ -100,15 +107,16 @@ public class ViewService extends view.MainWindow {
 				(int)screen.getHeight()
 		);
 		
-		btnLoadNew.setSize(140,  30);
-		textTotal .setSize( 78,  20);
+		int default_h = 20;
 		
-		p.y = 20;
-		lblTotal.setSize(90, p.y);
-		lblFrom	.setSize(30, p.y);
-		lblTo	.setSize(15, p.y);
+		btnLoadNew.setSize(140,  30);
+		textTotal .setSize( 78,  default_h);
 
-		p.x = 70; p.y = 20;
+		lblTotal.setSize(90, default_h);
+		lblFrom	.setSize(30, default_h);
+		lblTo	.setSize(15, default_h);
+
+		p.x = 70; p.y = default_h;
 		textDateFrom.setSize(p);
 		textDateTo	.setSize(p);
 
@@ -120,16 +128,18 @@ public class ViewService extends view.MainWindow {
 		int[] column_width = {0, 35, 70, 75, 75, 350};
 		for(int i=0; i<NUM_COLUMNS; i++) {
 			int w = column_width[i];
-			table.getColumn(i).setWidth(w);
+			transactionsTable.getColumn(i).setWidth(w);
 			tableWidth += w;
 		}
-		table.setSize(
+		transactionsTable.setSize(
 				tableWidth
-				+ 25,
+				+ 21, // Scrollbar width
 				shell.getSize().y
-				- Padding.SMALL.get()*4);
+				- Padding.SMALL.get()*4); // Window title bar height
 		
-		categories.setSize(70, 20);
+		int categories_w = 70;
+		categoriesService.setSize(categories_w, default_h);
+		categoriesTable.setSize(categories_w, 50);
 		
 		canvas.setSize(880, 500);
 		canvasService.setHeight(canvas.getSize().y);
@@ -138,16 +148,16 @@ public class ViewService extends view.MainWindow {
 	
 	private void setWidgetsLocation() {
 		Logger.trace("ViewService >> setWidgetsLocation");
-		categories.setIncrement(100, 20);
-		categories.perLine(4);
+		categoriesService.setIncrement(100, 20);
+		categoriesService.perLine(4);
 		
-		table.setLocation(
+		transactionsTable.setLocation(
 				Padding.SMALL.get(),
 				Padding.SMALL.get());
 		
 		lblTotal.setLocation(
-				table.getLocation().x
-				+ table.getSize().x
+				transactionsTable.getLocation().x
+				+ transactionsTable.getSize().x
 				+ Padding.BIG.get(),
 				Padding.SMALL.get()
 				+ (btnLoadNew.getSize().y
@@ -202,13 +212,13 @@ public class ViewService extends view.MainWindow {
 				textDateTo.getLocation().x,
 				textDateTo.getLocation().y);
 		
-		categories.setStartingLocation(
+		categoriesService.setStartingLocation(
 				lblFrom.getLocation().x,
 				textDateFrom.getLocation().y
 				+ 2*textDateFrom.getSize().y
 				+ Padding.BIG.get());
 		
-		categories.setNextButtonLocation();
+		categoriesService.setNextButtonLocation();
 		// TODO print widgets location to check
 	}
 	
@@ -224,8 +234,11 @@ public class ViewService extends view.MainWindow {
 		lblFrom.setText("From");
 		lblTo.setText("To");
 		
-		table.setHeaderVisible(true); // TODO autoscroll to bottom
-		table.setLinesVisible(true);
+		transactionsTable.setHeaderVisible(true); // TODO autoscroll to bottom
+		transactionsTable.setLinesVisible(true);
+		
+		categoriesTable.setHeaderVisible(true);
+		categoriesTable.setLinesVisible(true);
 		
 		String    balance   = transactionService.getTotalBalance().toString();
 		LocalDate firstDate = transactionService.getFirstDate();
@@ -255,7 +268,7 @@ public class ViewService extends view.MainWindow {
 				"Category", "Description"
 		};
 		for(int i=0; i<NUM_COLUMNS; i++) {
-			TableColumn col = table.getColumn(i);
+			TableColumn col = transactionsTable.getColumn(i);
 			
 			col.setResizable(false);
 			col.setText(column_text[i]);
@@ -274,7 +287,7 @@ public class ViewService extends view.MainWindow {
 				DateUtils.toString(to));
 		
 		Logger.debug("Selected categories: {"+
-				StringUtils.toString(categories.getSelected())+"}");
+				StringUtils.toString(categoriesService.getSelected())+"}");
 		
 		
 		List<Transaction> filteredList = transactionService
@@ -282,27 +295,51 @@ public class ViewService extends view.MainWindow {
 		
 		Set<String> categoriesInFilteredList =
 				new HashSet<String>();
-
-		Logger.debug("ViewService: Creating table...");
 		
-		table.setItemCount(0);
-		if(redraw) canvasService.clear();
+		transactionsTable.setItemCount(0);
+		if(redraw) {
+			canvasService.clear();
+			categoriesService.resetAmounts(); // TODO should update if different date range
+		}
 		
 		for(Transaction t: filteredList) {
+			String category = t.getCategory();
+			BigDecimal amount = new BigDecimal(t.getAmount());
 			
-			// *****************   Update table   ****************
-			if(categories.isSelected(t.getCategory()))
-				newTableItem(t);
+			// *****************   Update transactions table   ****************
+			if(categoriesService.isSelected(t.getCategory())) {
+				TableItem item = new TableItem(
+						transactionsTable, SWT.NONE);
+				
+				item.setText(1, t.getId().toString());
+				item.setText(2, t.getAmount());
+				item.setText(3, t.getDate());
+				item.setText(4, category);
+				item.setText(5, t.getDescription());
+			}
+			
+			// *****************   Update categories table   ****************
+			categoriesService.updateCategories(category, amount);
 			
 			// **************   Update checkboxes   **************
-			categoriesInFilteredList.add(t.getCategory());
+			categoriesInFilteredList.add(category);
 
 			// ****************   Update canvas   ****************
-			if(redraw) canvasService.addSnapshot(t.getAmount());
+			if(redraw) canvasService.addSnapshot(amount);
 		}
-		if(redraw) canvas.redraw();
-		
-		Logger.debug("ViewService: Table created.");
+		if(redraw) {
+			canvas.redraw();
+			setCategoriesTableLocation();
+			
+			TableItem item = new TableItem(
+					categoriesTable, SWT.NONE);
+			
+			Set<String> set = categoriesService.get();
+			List<String> categories = new ArrayList<String>(set);
+			for(int i=0; i<categories.size(); i++)
+				item.setText(i, categoriesService
+						.getAmount(categories.get(i)));
+		}
 		
 		for(Button b: checkboxes)
 				b.setEnabled(
@@ -334,8 +371,8 @@ public class ViewService extends view.MainWindow {
 							DateUtils.toString(transactionService
 							.getLastDate()));
 					
-					for(String category: categories.getNew()) {
-						categories.set(category, true);
+					for(String category: categoriesService.getNew()) {
+						categoriesService.updateCategories(category, true);
 						createCategoryCheckbox(category);
 					}
 										
@@ -395,16 +432,9 @@ public class ViewService extends view.MainWindow {
 		canvas.addPaintListener(new PaintListener() {
 			@Override
 			public void paintControl(PaintEvent e) {
-				Logger.trace("canvas: painted");
-
-				Button lastCheckbox = checkboxes
-						.get(checkboxes.size()-1);
-				canvas.setLocation(
-						lblTotal.getLocation().x,
-						lastCheckbox.getLocation().y
-						+ lastCheckbox.getSize().y
-						+ Padding.BIG.get());
+				Logger.trace("canvas: paint");
 				
+				setCanvasLocation();
 				canvasService.setStep(canvas.getSize().x);
 				canvasService.paintCanvas(e.gc, display);
 			}
@@ -413,26 +443,38 @@ public class ViewService extends view.MainWindow {
 	}
 	
 
-	public void initCategories() {
+	private void initCategories() {
 		Logger.trace("ViewService >> initCategories");
 		
 		for(Transaction t: transactionService.getCache())
-			categories.set(t.getCategory(), true);
+			categoriesService.updateCategories(t.getCategory(), true);
 
-		for(String name : categories.get())
+		int colWidth = categoriesTable.getSize().x;
+		Set<String> categories = categoriesService.get();
+		categoriesTable.setSize(
+				colWidth*categories.size(),
+				categoriesTable.getSize().y);
+		
+		for(String name: categories) {
 			createCategoryCheckbox(name);
+
+			TableColumn col = new TableColumn(
+					categoriesTable, SWT.NONE);
+			col.setResizable(false);
+			col.setText(name);
+			col.setWidth(colWidth);
+		}
 	}
 	
 	
 	private void createCategoryCheckbox(String name) {
-		Logger.trace("ViewService >> createCategoryCheckbox");
 		Button b = new Button(shell, SWT.CHECK);
 		
-		b.setLocation(categories.getNextButtonLocation());
-		b.setSize(categories.getSize());
+		b.setLocation(categoriesService.getNextButtonLocation());
+		b.setSize(categoriesService.getSize());
 		
 		b.setText(name);
-		b.setSelection(categories.isSelected(name));
+		b.setSelection(categoriesService.isSelected(name));
 		
 		b.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -443,7 +485,7 @@ public class ViewService extends view.MainWindow {
 				Logger.trace("btnCheckbox"+name+": "+action);
 				Logger.info("User "+action+" CheckBox '"+name+"'");
 				
-				categories.set(name,selected);
+				categoriesService.updateCategories(name,selected);
 				updateInterface(false);
 			}
 		});
@@ -469,13 +511,25 @@ public class ViewService extends view.MainWindow {
 	}
 	
 	
-	private void newTableItem(Transaction t) {
-		TableItem item = new TableItem(table, SWT.NONE);
+	private void setCanvasLocation() {
+		Logger.trace("ViewService >> setCanvasLocation");
 		
-		item.setText(1, t.getId().toString());
-		item.setText(2, t.getAmount());
-		item.setText(3, t.getDate());
-		item.setText(4, t.getCategory());
-		item.setText(5, t.getDescription());
+		Button lastCheckbox = checkboxes
+				.get(checkboxes.size()-1);
+		canvas.setLocation(
+				lblTotal.getLocation().x,
+				lastCheckbox.getLocation().y
+				+ lastCheckbox.getSize().y
+				+ Padding.BIG.get());
+	}
+	
+	private void setCategoriesTableLocation() {
+		Logger.trace("ViewService >> setCategoriesTableLocation");
+		
+		categoriesTable.setLocation(
+				canvas.getLocation().x,
+				canvas.getLocation().y
+				+ canvas.getSize().y
+				+ Padding.BIG.get());
 	}
 }

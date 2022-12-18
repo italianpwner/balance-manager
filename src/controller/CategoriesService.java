@@ -1,5 +1,6 @@
 package controller;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -7,12 +8,13 @@ import java.util.Set;
 
 import org.eclipse.swt.graphics.Point;
 
+import model.Category;
 import util.Logger;
 
 public class CategoriesService {
 
 	private static CategoriesService instance;
-	private Map<String,Boolean> categories;
+	private Map<String,Category> categories;
 	private int checkboxesPerLine;
 	private Point size;
 	private Point startPos;
@@ -20,7 +22,7 @@ public class CategoriesService {
 	private Point nextButtonLocation;
 	
 	private CategoriesService() {
-		categories = new HashMap<String,Boolean>();
+		categories = new HashMap<String,Category>();
 	}
 	
 	static CategoriesService getInstance() {
@@ -32,7 +34,11 @@ public class CategoriesService {
 	}
 	
 	Boolean isSelected(String category) {
-		return categories.get(category);
+		return categories.get(category).isSelected();
+	}
+	
+	String getAmount(String category) {
+		return categories.get(category).getAmount().toString();
 	}
 	
 	Set<String> getSelected() {
@@ -51,7 +57,7 @@ public class CategoriesService {
 		for(String category: get())
 			if(isSelected(category) == null) {
 				newCategories.add(category);
-				set(category, true);
+				updateCategories(category, true);
 			}
 		return newCategories;
 	}
@@ -65,8 +71,7 @@ public class CategoriesService {
 		return nextButtonLocation;
 	}
 	
-	private void computeNextButtonLocation() {	
-		Logger.trace("CategoriesService >> computeNextButtonLocation");	
+	private void computeNextButtonLocation() {
 		int max_X = startPos.x + increment.x*(checkboxesPerLine-1);
 		
 		if(nextButtonLocation.x == max_X) {
@@ -80,9 +85,6 @@ public class CategoriesService {
 	int size() { return categories.size(); }
 
 	Set<String> get() { return categories.keySet(); }
-	void set(String category, Boolean selected) {
-		categories.put(category, selected);
-	}
 	
 	Point getSize() { return size; }
 	void perLine(int n) { checkboxesPerLine = n; }
@@ -95,5 +97,37 @@ public class CategoriesService {
 		nextButtonLocation = new Point(
 				startPos.x-increment.x,
 				startPos.y-increment.y);
+	}
+	
+	void updateCategories(
+			String category, BigDecimal amount, Boolean selected)
+	{
+		if(isNew(category))
+			categories.put(category,
+					new Category(category,amount,selected));
+		else {
+			Category cat = categories.get(category);
+			cat.setSelected(selected);
+			cat.addAmount(amount);
+			categories.put(category, cat);
+		}
+	}
+	
+	void updateCategories(String category, Boolean selected) {
+		Category cat = categories.get(category);
+		updateCategories(cat.getName(), new BigDecimal("0.0"), selected);
+	}
+	
+	void updateCategories(String category, BigDecimal amount) {
+		Category cat = categories.get(category);
+		updateCategories(cat.getName(), amount, cat.isSelected());
+	}
+	
+	void resetAmounts() {
+		for(String name: categories.keySet()) {
+			Category cat = categories.get(name);
+			cat.setAmount(new BigDecimal("0.0"));
+			categories.put(name, cat);
+		}
 	}
 }
